@@ -24,8 +24,6 @@
 
     /* ── RESET ──────────────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    *:focus { outline: none; }
-    *:focus-visible { outline: none; }
 
     /* ── TOKENS ─────────────────────────────────────────────────────────── */
     :root {
@@ -39,6 +37,22 @@
       --border-distr:      #4d5766;
       --slider-track:      rgba(252,252,253,0.2);
       --slider-progress:   #fcfcfd;
+      --surface-transparent:    rgba(154,163,177,0);   /* idle state of tinted surfaces (colour kept so it can transition) */
+      --surface-hover:          #2c343f;
+      --surface-hover-input:    rgba(44,52,63,0.6);
+      --surface-selected:       #404a59;
+      --surface-selected-hover: #37404e;
+      --surface-input-solid:    #181d25;
+      --surface-gradient-end:   #232a34;
+      --surface-shader:         rgba(2,2,3,0.7);
+      --border-light:           rgba(219,223,230,0.2);
+      --border-light-0:         rgba(219,223,230,0);
+      --border-focus:           #dbdfe6;
+      --border-sticky:          #dfe4e8;
+      --focus-ring:             #005fcc;
+      --ds3-duration:           0.25s;
+      --ds3-ease:               cubic-bezier(0.75, 0.02, 0.5, 1);
+      --motion-reel:            1s ease;               /* result digit reels: all columns slide together */
       --radius-card:       20px;
       --radius-input:      10px;
       --radius-pill:       999px;
@@ -95,6 +109,13 @@
       --sys-fs-headline-order2: 24px;  --sys-lh-headline-order2: 36px;
       --sys-fs-headline-order3: 20px;  --sys-lh-headline-order3: 32px;
       --sys-fs-headline-order4: 16px;  --sys-lh-headline-order4: 24px;
+      --sys-fs-copy-order1:  1rem;      --sys-lh-copy-order1:  1.5rem;
+      --sys-fs-copy-order2:  0.875rem;  --sys-lh-copy-order2:  1.5rem;
+      --sys-fs-copy-order3:  0.75rem;   --sys-lh-copy-order3:  1.25rem;
+      --sys-fs-label-order1: 1rem;      --sys-lh-label-order1: 1.25rem;
+      --sys-fs-label-order2: 0.875rem;  --sys-lh-label-order2: 1.25rem;
+      --fvs-copy:     'wdth' var(--wdth-wide),     'wght' 400;
+      --fvs-headline: 'wdth' var(--wdth-extended), 'wght' 400;
     }
 
     /* ── CUSTOM MEDIA (CSS MQ Level 5 — postcss-custom-media compatible) ─── */
@@ -224,26 +245,30 @@
 
     /* ── LAYOUT VARIABLES (page-level, from the live layout) ───────────── */
     :root {
-      --q-gap: 28px;           /* vertical gap between questions */
-      --select-gap: 12px;      /* gap between the two selects */
+      --q-gap: var(--sys-space-relative-xl);      /* vertical gap between questions: 28 up to 1024, 32 from 1440 */
+      --select-gap: var(--sys-space-fixed-150);   /* gap between the two selects */
       --vw-24: calc(min(100vw, var(--max-content-width)) / 24);
       --distr-pad: var(--vw-24);
+      --distr-thumb: 28px;                        /* distribution handle (28px round slider thumb) */
     }
-    @media (min-width: 768px)  { :root { --select-gap: 28px; } }
-    @media (min-width: 1024px) { :root { --select-gap: 12px; --distr-pad: 0px; } }
-    @media (min-width: 1440px) { :root { --q-gap: 32px; --select-gap: 16px; } }
-    @media (min-width: 1920px) { :root { --select-gap: 24px; } }
+    @media (min-width: 768px)  { :root { --select-gap: var(--sys-space-relative-xl); } }
+    @media (min-width: 1024px) { :root { --select-gap: var(--sys-space-fixed-150); --distr-pad: var(--sys-space-fixed-0); } }
+    @media (min-width: 1440px) { :root { --q-gap: var(--sys-space-fixed-400); --select-gap: var(--sys-space-fixed-200); } }
+    @media (min-width: 1920px) { :root { --select-gap: var(--sys-space-fixed-300); } }
+
+    /* ── FOCUS ──────────────────────────────────────────────────────────── */
+    :focus-visible { outline: auto 1px var(--focus-ring); }
 
     /* ── PAGE ───────────────────────────────────────────────────────────── */
-    .page-layout { padding: 28px var(--sys-page-margin) 28px; display: flex; flex-direction: column; }
+    .page-layout { padding: var(--sys-space-relative-xl) var(--sys-page-margin); display: flex; flex-direction: column; }
 
     /* ── HEADER ─────────────────────────────────────────────────────────── */
-    .header { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 40px; }
-    .header-icon { flex-shrink: 0; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+    .header { display: flex; align-items: flex-start; gap: var(--sys-space-fixed-250); margin-bottom: var(--sys-space-fixed-500); }
+    .header-icon { flex-shrink: 0; width: var(--sys-space-fixed-600); height: var(--sys-space-fixed-600); display: flex; align-items: center; justify-content: center; }
     .header h1 {
       font-family: var(--font-headline);
-      font-variation-settings: 'wdth' 130, 'wght' 400;
-      font-size: 24px; line-height: 36px; font-weight: 400;
+      font-variation-settings: var(--fvs-headline);
+      font-size: var(--sys-fs-headline-order2); line-height: var(--sys-lh-headline-order2); font-weight: 400;
       letter-spacing: 0; color: var(--text-primary);
     }
 
@@ -260,10 +285,10 @@
     .input-end-sentinel { position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; pointer-events: none; }
 
     /* ── COMBO ───────────────────────────────────────────────────────────── */
-    .combo { display: flex; flex-direction: column; gap: 8px; }
+    .combo { display: flex; flex-direction: column; gap: var(--sys-space-fixed-100); }
     .combo-divider {
       border: 0; border-top: 1px solid var(--border-card);
-      height: 2px; margin: 0;
+      height: var(--sys-space-fixed-25); margin: 0;
     }
 
     /* Question label: the info button sits inline at the end of the label and wraps together with the last word.
@@ -271,25 +296,39 @@
     .question-text {
       display: block;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 16px; line-height: 24px; letter-spacing: 0px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1); letter-spacing: 0;
       font-stretch: 105%; font-weight: 400;
       color: var(--text-muted); text-decoration: none;
     }
     .question-end { white-space: nowrap; }
+
+    /* info button: round 36px, hover / pressed surface + light border */
     .info-btn {
-      width: 36px; height: 36px;
+      width: var(--sys-space-fixed-450); height: var(--sys-space-fixed-450);
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; background: none; border: none; cursor: pointer; padding: 0;
+      flex-shrink: 0; cursor: pointer; padding: 0;
+      color: var(--text-primary);
+      background-color: var(--surface-transparent);
+      border: 1px solid var(--border-light-0);
+      border-radius: var(--radius-pill);
+      transition: color var(--ds3-duration) var(--ds3-ease), box-shadow var(--ds3-duration) var(--ds3-ease),
+                  border-color var(--ds3-duration) var(--ds3-ease), background-color var(--ds3-duration) var(--ds3-ease);
+    }
+    .info-btn:hover, .info-btn:active {
+      background-color: var(--surface-hover);
+      border-color: var(--border-light);
     }
     .question-end .info-btn {
       display: inline-flex; vertical-align: middle;
-      margin-left: 4px; margin-right: -12px;
+      margin-left: var(--sys-space-fixed-50); margin-right: calc(var(--sys-space-fixed-150) * -1);
     }
-    .info-btn svg, .info-btn img { width: 16px; height: 16px; }
+    .info-btn svg, .info-btn img { width: var(--sys-space-fixed-200); height: var(--sys-space-fixed-200); }
 
     sup.fn-ref {
-      font-size: 12px; line-height: 22px; vertical-align: super;
+      font-size: var(--sys-fs-copy-order3);
+      line-height: calc(var(--sys-lh-copy-order3) + var(--sys-space-fixed-25));
+      vertical-align: super;
       color: var(--text-muted);
     }
 
@@ -307,8 +346,7 @@
       align-items: center; justify-content: center;
       position: relative;
     }
-    #seg-country { background: rgba(24,29,37,1); }
-    .distr-seg svg { width: 24px; height: 24px; }
+    #seg-country { background: var(--surface-input-solid); }
     .distr-icon {
       position: absolute; top: 50%;
       transform: translate(-50%, -50%);
@@ -323,112 +361,122 @@
     .distr-handle {
       position: absolute;
       transform: translateX(-50%);
-      cursor: ew-resize; z-index: 10; user-select: none;
+      z-index: 10; user-select: none;
     }
     .distr-handle-top    { top: 0; }
     .distr-handle-bottom { bottom: 0; }
-    .distr-handle-top .distr-thumb    { top: -14px; }
-    .distr-handle-bottom .distr-thumb { bottom: -14px; }
+    .distr-handle-top .distr-thumb    { top: calc(var(--distr-thumb) / -2); }
+    .distr-handle-bottom .distr-thumb { bottom: calc(var(--distr-thumb) / -2); }
+    /* the handle is a real slider (role=slider); 28px round thumb */
     .distr-thumb {
       display: flex; position: absolute; z-index: 1;
-      left: -14px;
+      left: calc(var(--distr-thumb) / -2);
       box-sizing: border-box;
       align-items: center; justify-content: center;
-      width: 28px; height: 28px;
-      border: 1px solid rgb(77, 87, 102); border-radius: 100%;
-      background-color: rgb(16, 19, 25);
-      color: rgba(252, 252, 253, 0.7);
+      width: var(--distr-thumb); height: var(--distr-thumb);
+      border: 1px solid var(--border-distr); border-radius: 100%;
+      background-color: var(--canvas);
+      color: var(--text-muted);
       cursor: grab;
       overflow: hidden;
+      outline: none;
+      transition: background-color var(--ds3-duration) var(--ds3-ease), border-color var(--ds3-duration) var(--ds3-ease);
     }
+    .distr-thumb:focus-visible { background-color: var(--text-muted); border-color: var(--text-muted); }
     .distr-thumb-arrows {
       display: flex; align-items: center; justify-content: center; gap: 6px;
       pointer-events: none;
     }
     .distr-labels {
       display: flex; justify-content: space-between;
-      padding: 24px 0 0;
+      padding: var(--sys-space-fixed-300) 0 0;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 16px; line-height: 24px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1);
       color: var(--text-muted);
     }
     .distr-label-col { flex: 1; display: flex; flex-direction: column; align-items: center; }
-    .distr-pct  { font-size: 16px; line-height: 24px; font-variation-settings: 'wdth' 105, 'wght' 400; font-weight: 400; }
-    .distr-name { font-size: 16px; line-height: 24px; font-variation-settings: 'wdth' 105, 'wght' 400; font-weight: 400; color: var(--text-muted); }
+    .distr-pct  { font-weight: 400; }
+    .distr-name { font-weight: 400; color: var(--text-muted); }
 
     /* ── RADIO GROUP ────────────────────────────────────────────────────── */
-    .radio-group { display: flex; gap: 24px; align-items: flex-start; }
-    .radio-option { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
-    .radio-control { width: 24px; height: 24px; flex-shrink: 0; position: relative; cursor: pointer; }
+    .radio-group { display: flex; gap: var(--sys-space-fixed-300); align-items: flex-start; }
+    .radio-option { display: flex; align-items: flex-start; gap: var(--sys-space-fixed-150); cursor: pointer; }
+    .radio-control { width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-300); flex-shrink: 0; position: relative; cursor: pointer; }
     .radio-control input[type="radio"] {
       position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; margin: 0;
     }
+    .radio-control input[type="radio"]:focus-visible { outline-offset: 2px; }
     .radio-visual {
-      display: block; width: 24px; height: 24px;
+      display: block; width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-300);
       border-radius: 50%;
-      background: rgba(24,29,37,0.6);
-      border: 1px solid rgba(219,223,230,0.6);
+      background: var(--surface-input);
+      border: 1px solid var(--border-input);
       position: relative; flex-shrink: 0; pointer-events: none;
+      transition: border-color 0.25s ease, color 0.25s ease, background-color 0.25s ease;
     }
-    .radio-control input[type="radio"]:checked ~ .radio-visual {
-      background: #404A59;
-    }
+    .radio-control input[type="radio"]:checked ~ .radio-visual { background: var(--surface-selected); }
     .radio-control input[type="radio"]:checked ~ .radio-visual::after {
       content: '';
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 12px; height: 12px;
+      width: var(--sys-space-fixed-150); height: var(--sys-space-fixed-150);
       border-radius: 50%;
-      background: rgba(252,252,253,0.7);
+      background: var(--text-muted);
     }
+    .radio-control input[type="radio"]:focus-visible ~ .radio-visual { outline: solid 2px var(--focus-ring); }
+    .radio-option:hover .radio-control input[type="radio"]:checked ~ .radio-visual { background: var(--surface-selected-hover); }
     .radio-label {
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
+      font-variation-settings: var(--fvs-copy);
       font-weight: 400;
-      font-size: 16px; line-height: 20px;
-      color: var(--text-muted); padding: 2px 0;
+      font-size: var(--sys-fs-label-order1); line-height: var(--sys-lh-label-order1);
+      color: var(--text-muted); padding: var(--sys-space-fixed-25) 0;
+      transition: color 0.25s ease;
     }
+    .radio-option:hover .radio-label { color: var(--text-primary); }
 
     /* ── SELECT ─────────────────────────────────────────────────────────── */
     .select-wrapper { position: relative; width: 100%; }
     .select-field {
-      width: 100%; height: 48px;
-      background: var(--surface-input);
+      width: 100%; height: var(--sys-space-fixed-600);
+      background-color: var(--surface-input);
       border: 0;
       box-shadow: inset 0 0 0 1px var(--border-input);
       border-radius: var(--radius-input);
-      padding: 12px 48px 12px 12px;
+      padding: var(--sys-space-fixed-150) var(--sys-space-fixed-600) var(--sys-space-fixed-150) var(--sys-space-fixed-150);
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
+      font-variation-settings: var(--fvs-copy);
       font-weight: 400;
-      font-size: 16px; line-height: 20px;
+      font-size: var(--sys-fs-label-order1); line-height: var(--sys-lh-label-order1);
       color: var(--text-primary);
       appearance: none; -webkit-appearance: none; cursor: pointer;
+      transition: background-color var(--ds3-duration) var(--ds3-ease), box-shadow var(--ds3-duration) var(--ds3-ease);
     }
-    .select-field:focus { outline: none; }
-    .select-field option { background: #1e2433; color: var(--text-primary); }
-    .select-field optgroup { background: #1e2433; color: var(--text-muted); font-style: normal; font-size: 13px; }
+    .select-field:hover { background-color: var(--surface-hover-input); }
+    .select-field:focus-visible { box-shadow: inset 0 0 0 1px var(--border-focus); }
+    .select-field option { background: var(--canvas); color: var(--text-primary); }
+    .select-field optgroup { background: var(--canvas); color: var(--text-muted); font-style: normal; }
     .select-chevron {
-      position: absolute; right: 16px; top: 50%;
+      position: absolute; right: var(--sys-space-fixed-200); top: 50%;
       transform: translateY(-50%);
-      width: 24px; height: 24px; pointer-events: none;
+      width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-300); pointer-events: none;
       display: flex; align-items: center; justify-content: center;
     }
-    .select-chevron svg, .select-chevron img { width: 24px; height: 24px; }
+    .select-chevron svg, .select-chevron img { width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-300); }
 
     /* ── MILES SLIDER ───────────────────────────────────────────────────── */
     .slider-temp { display: flex; flex-direction: column; width: 100%; }
-    .slider-value-row { position: relative; height: 32px; }
+    .slider-value-row { position: relative; height: var(--sys-space-fixed-400); }
     .slider-value-display {
       position: absolute; bottom: 0; left: 0;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
+      font-variation-settings: var(--fvs-copy);
       font-weight: 400;
-      font-size: 16px; line-height: 20px;
-      color: var(--text-muted); white-space: nowrap; padding: 2px 8px;
+      font-size: var(--sys-fs-label-order1); line-height: var(--sys-lh-label-order1);
+      color: var(--text-muted); white-space: nowrap; padding: var(--sys-space-fixed-25) var(--sys-space-fixed-100);
     }
-    .slider-track-row { position: relative; height: 24px; display: flex; align-items: center; }
+    .slider-track-row { position: relative; height: var(--sys-space-fixed-300); display: flex; align-items: center; }
     .slider-track-bg {
       position: absolute; left: 0; right: 0; top: 9px;
       height: 6px; background: var(--slider-track);
@@ -441,32 +489,32 @@
     }
     input[type="range"].temp-slider {
       position: absolute; left: 0; right: 0; top: 0; width: 100%;
-      height: 24px; background: transparent;
+      height: var(--sys-space-fixed-300); background: transparent;
       appearance: none; -webkit-appearance: none;
       cursor: pointer; z-index: 2; margin: 0;
     }
     input[type="range"].temp-slider::-webkit-slider-runnable-track {
-      height: 24px; background: transparent;
+      height: var(--sys-space-fixed-300); background: transparent;
     }
     input[type="range"].temp-slider::-webkit-slider-thumb {
       appearance: none; -webkit-appearance: none;
-      width: 24px; height: 12px; margin-top: 6px;
-      border-radius: 999px;
-      background: #fcfcfd; border: 1px solid #2c343f;
+      width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-150); margin-top: 6px;
+      border-radius: var(--radius-pill);
+      background: var(--text-primary); border: 1px solid var(--surface-hover);
       cursor: ew-resize;
     }
     input[type="range"].temp-slider::-moz-range-thumb {
-      width: 24px; height: 12px;
-      border-radius: 999px;
-      background: #fcfcfd; border: 1px solid #2c343f;
+      width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-150);
+      border-radius: var(--radius-pill);
+      background: var(--text-primary); border: 1px solid var(--surface-hover);
       cursor: ew-resize;
     }
     .slider-range-row {
-      display: flex; justify-content: space-between; padding-top: 8px;
+      display: flex; justify-content: space-between; padding-top: var(--sys-space-fixed-100);
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
+      font-variation-settings: var(--fvs-copy);
       font-weight: 400;
-      font-size: 14px; line-height: 20px; color: var(--text-muted);
+      font-size: var(--sys-fs-label-order2); line-height: var(--sys-lh-label-order2); color: var(--text-muted);
     }
 
     /* ── CHARGE LOCATION ROWS ───────────────────────────────────────────── */
@@ -474,21 +522,21 @@
     .charge-loc-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 84px;
-      column-gap: 20px;
+      column-gap: var(--sys-space-fixed-250);
       align-items: start;
     }
     /* below 1024px the slider spans the full row below label + price field */
     .charge-loc-label {
-      grid-column: 1; grid-row: 1; padding-bottom: 24px;
+      grid-column: 1; grid-row: 1; padding-bottom: var(--sys-space-fixed-300);
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 14px; line-height: 24px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order2); line-height: var(--sys-lh-copy-order2);
       color: var(--text-muted);
     }
     .charge-loc-text, .charge-loc-value { display: block; }
     .charge-loc-slider-wrap {
       grid-column: 1 / -1; grid-row: 2;
-      position: relative; height: 24px; width: 100%;
+      position: relative; height: var(--sys-space-fixed-300); width: 100%;
     }
     .charge-loc-input-wrap {
       grid-column: 2; grid-row: 1;
@@ -496,208 +544,217 @@
     }
     .charge-loc-unit {
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 14px; line-height: 20px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-label-order2); line-height: var(--sys-lh-label-order2);
       color: var(--text-muted);
       white-space: nowrap;
     }
-    .charge-loc-input-wrap .charge-loc-unit { padding-bottom: 8px; }
+    .charge-loc-input-wrap .charge-loc-unit { padding-bottom: var(--sys-space-fixed-100); }
 
-    /* price field: input with an inline clear button */
+    /* price field: number input with an inline clear button */
     .price-field {
       position: relative;
-      width: 84px; height: 48px;
-      background: rgba(24, 29, 37, 0.6);
-      box-shadow: inset 0 0 0 1px rgba(219, 223, 230, 0.6);
-      border-radius: 10px;
+      width: 84px; height: var(--sys-space-fixed-600);
+      background-color: var(--surface-input);
+      box-shadow: inset 0 0 0 1px var(--border-input);
+      border-radius: var(--radius-input);
       box-sizing: border-box;
+      transition: background-color var(--ds3-duration) var(--ds3-ease), box-shadow var(--ds3-duration) var(--ds3-ease);
     }
-    .price-field:focus-within { box-shadow: inset 0 0 0 1px rgba(252, 252, 253, 0.8); }
+    .price-field:hover { background-color: var(--surface-hover-input); }
+    .price-field:has(.price-input:focus) {
+      background-color: var(--surface-input);
+      box-shadow: inset 0 0 0 1px var(--border-focus);
+      outline: solid 2px var(--focus-ring);
+    }
     .price-input {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       background: transparent;
       border: none;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 16px;
-      line-height: 20px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-label-order1);
+      line-height: var(--sys-lh-label-order1);
       color: var(--text-primary);
       text-align: left;
       -moz-appearance: textfield;
       outline: none;
-      padding: 0 36px 0 12px;
-      border-radius: 10px;
+      padding: 0 var(--sys-space-fixed-450) 0 var(--sys-space-fixed-150);
+      border-radius: var(--radius-input);
+      transition: color var(--ds3-duration) var(--ds3-ease);
     }
     .price-input::-webkit-outer-spin-button,
     .price-input::-webkit-inner-spin-button { -webkit-appearance: none; }
     .price-clear {
-      position: absolute; right: 12px; top: 12px;
-      width: 24px; height: 24px;
+      position: absolute; right: var(--sys-space-fixed-150); top: var(--sys-space-fixed-150);
+      width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-300);
       background: none; border: none; padding: 0;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      color: rgba(252, 252, 253, 0.7);
+      color: var(--text-muted);
     }
-    .price-clear:hover { color: rgba(252, 252, 253, 1); }
 
-    /* ── RESET ROW ──────────────────────────────────────────────────────── */
-    .reset-row { display: flex; align-items: flex-start; min-height: 28px; margin-top: -4px; }
-    .reset-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: none;
-      border: none;
-      cursor: pointer;
+    /* ── TEXT BUTTONS (reset, show all values, layer link): hover / pressed -> 70% ── */
+    .text-btn {
+      background: none; border: none; cursor: pointer; padding: 0;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 16px;
-      line-height: 24px;
+      font-variation-settings: var(--fvs-copy);
       color: var(--text-primary);
       text-align: left;
       text-decoration: underline;
+      text-decoration-color: var(--text-primary);
       text-decoration-thickness: 1px;
       text-underline-offset: 4px;
-      padding: 0 0 2px;
+      transition: color var(--ds3-duration) var(--ds3-ease), text-decoration-color var(--ds3-duration) var(--ds3-ease);
     }
-    .reset-btn svg { flex-shrink: 0; width: 24px; height: 24px; }
-    .reset-btn:hover { opacity: 0.75; }
+    .text-btn:hover, .text-btn:active { color: var(--text-muted); text-decoration-color: var(--text-muted); }
+
+    /* ── RESET ROW ──────────────────────────────────────────────────────── */
+    .reset-row { display: flex; align-items: flex-start; min-height: calc(var(--sys-space-fixed-300) + var(--sys-space-fixed-50)); margin-top: calc(var(--sys-space-fixed-50) * -1); }
+    .reset-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--sys-space-fixed-100);
+      font-size: var(--sys-fs-copy-order1);
+      line-height: var(--sys-lh-copy-order1);
+      padding-bottom: var(--sys-space-fixed-25);
+    }
+    .reset-btn svg { flex-shrink: 0; width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-300); }
 
     /* ── FUEL PRICES ────────────────────────────────────────────────────── */
-    .fuel-prices-row { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
+    .fuel-prices-row { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--sys-space-fixed-200); }
     .fuel-price-item {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      column-gap: 8px; row-gap: 8px;
+      column-gap: var(--sys-space-fixed-100); row-gap: var(--sys-space-fixed-100);
       align-items: center;
     }
     .fuel-price-item .fuel-price-label { grid-column: 1 / -1; }
     .fuel-price-item .price-field { width: auto; }
-    .fuel-price-item .charge-loc-unit { line-height: 24px; margin-bottom: 8px; }
+    .fuel-price-item .charge-loc-unit { line-height: var(--sys-lh-copy-order2); margin-bottom: var(--sys-space-fixed-100); }
     .fuel-price-label {
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 14px;
-      line-height: 24px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order2);
+      line-height: var(--sys-lh-copy-order2);
       color: var(--text-muted);
       white-space: nowrap;
     }
 
     /* ── OUTPUT PANEL ───────────────────────────────────────────────────── */
-    .section-output { display: flex; flex-direction: column; gap: 32px; width: 100%; min-width: 0; padding: 0 4px; }
+    .section-output { display: flex; flex-direction: column; gap: var(--sys-space-fixed-400); width: 100%; min-width: 0; padding: 0 var(--sys-space-fixed-50); }
     .section-model { display: flex; flex-direction: column; gap: 38px; }
-    .model-combo { display: flex; flex-direction: column; gap: 12px; }
+    .model-combo { display: flex; flex-direction: column; gap: var(--sys-space-fixed-150); }
     .model-label {
       display: block;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 16px; line-height: 24px; color: var(--text-muted);
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1); color: var(--text-muted);
     }
     .select-group { display: flex; gap: var(--select-gap); }
     .select-group > div { flex: 0 0 calc((100% - var(--select-gap)) / 2); min-width: 0; }
     .select-sub-label {
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 14px; line-height: 20px; color: var(--text-muted);
-      padding-bottom: 8px; display: block;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-label-order2); line-height: var(--sys-lh-label-order2); color: var(--text-muted);
+      padding-bottom: var(--sys-space-fixed-100); display: block;
     }
 
     /* ── CAR + CONSUMPTION DATA ─────────────────────────────────────────── */
-    .car-wrapper { display: flex; flex-direction: column; gap: 8px; }
-    .car-img-box { aspect-ratio: 260/110; width: 100%; max-width: 640px; margin-inline: auto; position: relative; overflow: hidden; border-radius: 4px; }
+    .car-wrapper { display: flex; flex-direction: column; gap: var(--sys-space-fixed-100); }
+    .car-img-box { aspect-ratio: 260/110; width: 100%; max-width: 640px; margin-inline: auto; position: relative; overflow: hidden; border-radius: var(--sys-space-fixed-50); }
     .car-img-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .cons-block {
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 14px; line-height: 24px; letter-spacing: 0;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order2); line-height: var(--sys-lh-copy-order2); letter-spacing: 0;
       color: var(--text-muted);
     }
     .cons-link {
-      display: block; background: none; border: none; cursor: pointer; text-align: left;
-      font: inherit; color: inherit;
-      text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
-      padding: 0 0 2px;
+      display: block;
+      font-size: var(--sys-fs-copy-order2); line-height: var(--sys-lh-copy-order2);
+      padding-bottom: var(--sys-space-fixed-25);
     }
-    .cons-link:hover { opacity: 0.75; }
-    .cons-all { display: none; padding: 4px 0 8px; list-style: none; }
+    .cons-link span { color: var(--text-muted); }   /* label 70%, underline 100% (goes to 70% on hover) */
+    .cons-all { display: none; padding: var(--sys-space-fixed-50) 0 var(--sys-space-fixed-100); list-style: none; }
     .cons-all.is-open { display: block; }
 
     /* ── RESULT CARD ────────────────────────────────────────────────────── */
     .section-result {
       background: var(--surface-card);
       border-radius: var(--radius-card);
-      padding: 24px;
-      display: flex; flex-direction: column; gap: 24px;
+      padding: var(--sys-space-fixed-300);
+      display: flex; flex-direction: column; gap: var(--sys-space-fixed-300);
     }
-    .result-main { display: flex; flex-direction: column; gap: 12px; }
+    .result-main { display: flex; flex-direction: column; gap: var(--sys-space-fixed-150); }
     .result-headline {
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 16px; line-height: 24px; letter-spacing: 0px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1); letter-spacing: 0;
       color: var(--text-muted);
     }
     /* the card headline's info button must not grow the line box */
-    .result-headline .question-end .info-btn { vertical-align: top; margin: -4px -12px -8px 0; }
+    .result-headline .question-end .info-btn { vertical-align: top; margin: calc(var(--sys-space-fixed-50) * -1) calc(var(--sys-space-fixed-150) * -1) calc(var(--sys-space-fixed-100) * -1) 0; }
     .result-sub-label {
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 12px;
-      line-height: 20px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order3);
+      line-height: var(--sys-lh-copy-order3);
       color: var(--text-muted);
     }
     .cost-value {
       font-family: var(--font-headline);
-      font-variation-settings: 'wdth' 130, 'wght' 400;
+      font-variation-settings: var(--fvs-headline);
       font-size: var(--sys-fs-display-order1);
       line-height: var(--sys-lh-display-order1);
       color: var(--text-primary);
       display: flex; align-items: baseline;
     }
     .slot-digit { display: inline-block; overflow: hidden; height: 1em; vertical-align: top; }
-    .slot-reel { display: flex; flex-direction: column; transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+    .slot-reel { display: flex; flex-direction: column; transition: transform var(--motion-reel); }
     .slot-reel span { display: block; height: 1em; line-height: 1; text-align: center; }
     .range-unit {
       font-family: var(--font-headline);
-      font-variation-settings: 'wdth' 130, 'wght' 400;
+      font-variation-settings: var(--fvs-headline);
       font-size: var(--sys-fs-display-order1); line-height: var(--sys-lh-display-order1);
       color: var(--text-primary);
     }
     .cost-stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      column-gap: 24px;
+      column-gap: var(--sys-space-fixed-300);
       align-items: center;
-      padding-bottom: 24px;
+      padding-bottom: var(--sys-space-fixed-300);
       border-bottom: 1px solid var(--text-primary);
     }
     .cost-stat-label, .cost-compare-label {
       display: block; -webkit-hyphens: auto; hyphens: auto;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 12px;
-      line-height: 20px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order3);
+      line-height: var(--sys-lh-copy-order3);
       color: var(--text-muted);
     }
     .cost-stat-value {
       display: block;
       font-family: var(--font-headline);
-      font-variation-settings: 'wdth' 130, 'wght' 400;
+      font-variation-settings: var(--fvs-headline);
       font-size: var(--sys-fs-headline-order3);
       line-height: var(--sys-lh-headline-order3);
       color: var(--text-primary);
     }
-    .cost-comparison { display: flex; flex-direction: column; gap: 24px; }
+    .cost-comparison { display: flex; flex-direction: column; gap: var(--sys-space-fixed-300); }
     .cost-compare-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      column-gap: 24px;
+      column-gap: var(--sys-space-fixed-300);
       align-items: center;
     }
     .cost-compare-value {
       display: block;
       font-family: var(--font-headline);
-      font-variation-settings: 'wdth' 130, 'wght' 400;
+      font-variation-settings: var(--fvs-headline);
       font-size: var(--sys-fs-headline-order4);
       line-height: var(--sys-lh-headline-order4);
       color: var(--text-primary);
@@ -706,25 +763,25 @@
     /* ── STICKY RESULT BAR (below 1024px) ───────────────────────────────── */
     .cost-sticky {
       position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-      padding: 16px 32px;
-      background: rgba(154, 163, 177, 0.1);
+      padding: var(--sys-space-fixed-200) var(--sys-space-fixed-400);
+      background: var(--surface-card);
       -webkit-backdrop-filter: blur(60px); backdrop-filter: blur(60px);
-      border-top: 1px solid #dfe4e8;
-      transition: transform 250ms cubic-bezier(0.75, 0.02, 0.5, 1);
+      border-top: 1px solid var(--border-sticky);
+      transition: transform 250ms var(--ds3-ease);
     }
     .cost-sticky.is-hidden { transform: translateY(100%); }
     @media (min-width: 1024px) { .cost-sticky { display: none; } }
     .cost-sticky-label {
       display: block;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 16px; line-height: 24px;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1);
       color: var(--text-muted);
     }
     .cost-sticky-value {
       display: block;
       font-family: var(--font-headline);
-      font-variation-settings: 'wdth' 130, 'wght' 400;
+      font-variation-settings: var(--fvs-headline);
       font-size: var(--sys-fs-display-order2);
       line-height: var(--sys-lh-display-order2);
       color: var(--text-primary);
@@ -736,18 +793,19 @@
       display: grid; grid-template-columns: 27px minmax(0, 1fr);
       margin-bottom: 6px;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 12px; line-height: 20px; letter-spacing: 0;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order3); line-height: var(--sys-lh-copy-order3); letter-spacing: 0;
       color: var(--text-muted);
     }
     .footnote:last-child { margin-bottom: 0; }
 
     /* ── FAQ ────────────────────────────────────────────────────────────── */
-    .faq { margin-top: 28px; }
+    .faq { margin-top: var(--sys-space-relative-xl); }
+    /* shrink-to-fit box, centred; text inside stays left-aligned (wraps from the left once it fills the width) */
     .faq-title {
-      width: 100%; margin: 0 0 var(--vw-24); text-align: left;
+      width: fit-content; max-width: 100%; margin: 0 auto var(--vw-24);
       font-family: var(--font-headline);
-      font-variation-settings: 'wdth' 130, 'wght' 400;
+      font-variation-settings: var(--fvs-headline);
       font-size: var(--sys-fs-headline-order2); line-height: var(--sys-lh-headline-order2);
       font-weight: 400; letter-spacing: 0; color: var(--text-primary);
     }
@@ -759,36 +817,74 @@
     .faq-row { display: flex; border-top: 1px solid var(--border-card); }
     .faq-q { flex: 1; min-width: 0; margin: 0; font: inherit; }
     .faq-btn {
-      display: flex; align-items: center; gap: 8px;
-      width: 100%; padding: 16px;
-      background: none; border: 0; cursor: pointer; text-align: left;
+      display: flex; align-items: center; gap: var(--sys-space-fixed-100);
+      width: 100%; padding: var(--sys-space-fixed-200);
+      background-color: var(--surface-transparent); border: 0; cursor: pointer; text-align: left;
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 16px; line-height: 20px; font-weight: 400;
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-label-order1); line-height: var(--sys-lh-label-order1); font-weight: 400;
       color: var(--text-primary);
-      transition: background-color 250ms cubic-bezier(0.75, 0.02, 0.5, 1), color 250ms cubic-bezier(0.75, 0.02, 0.5, 1);
+      transition: color 0.25s ease, background-color 0.25s ease;
     }
     .faq-btn-text { flex: 1; min-width: 0; }
-    .faq-btn:hover, .faq-btn:focus-visible, .faq-btn[aria-expanded="true"] {
-      background-color: #404a59; color: var(--text-muted);
-    }
-    .faq-btn:focus-visible { outline: 1px solid var(--text-primary); outline-offset: -1px; }
-    .faq-chevron { flex: none; width: 24px; height: 24px; display: block; transition: transform 250ms cubic-bezier(0.75, 0.02, 0.5, 1); }
+    .faq-btn:hover { background-color: var(--surface-hover); color: var(--text-muted); }
+    /* focus (after a click, or keyboard) wins over hover ... */
+    .faq-btn:focus, .faq-btn:focus-visible { background-color: var(--surface-selected); color: var(--text-muted); }
+    /* ... but the pressed state shows the hover surface again */
+    .faq-btn:active { background-color: var(--surface-hover); color: var(--text-muted); }
+    .faq-chevron { flex: none; width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-300); display: block; transition: transform 0.2s ease-in; }
     .faq-btn[aria-expanded="true"] .faq-chevron { transform: rotate(180deg); }
     .faq-panel {
       display: grid; grid-template-rows: 0fr; visibility: hidden;
-      transition: grid-template-rows 250ms cubic-bezier(0.75, 0.02, 0.5, 1), visibility 0s linear 250ms;
+      transition: grid-template-rows 0.25s ease, visibility 0s linear 0.25s;
     }
     .faq-panel.is-open { grid-template-rows: 1fr; visibility: visible; transition-delay: 0s; }
     .faq-panel-inner {
-      min-height: 0; overflow: hidden; padding: 0 16px;
-      transition: padding 250ms cubic-bezier(0.75, 0.02, 0.5, 1);
+      min-height: 0; overflow: hidden; padding: 0 var(--sys-space-fixed-200);
+      transition: padding 0.25s ease;
     }
-    .faq-panel.is-open .faq-panel-inner { padding: 16px; }
+    .faq-panel.is-open .faq-panel-inner { padding: var(--sys-space-fixed-200); }
     .faq-panel-inner p {
       font-family: var(--font-copy);
-      font-variation-settings: 'wdth' 105, 'wght' 400;
-      font-size: 16px; line-height: 24px; color: var(--text-muted);
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1); color: var(--text-muted);
+    }
+
+    /* ── INFO LAYER (modal): shader + dialog (centred on desktop, bottom sheet below 1024px) ── */
+    .info-layer {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+    .info-layer[hidden] { display: none; }
+    .info-layer-shader {
+      position: absolute; inset: 0;
+      background-color: var(--surface-shader);
+      animation: info-shader-in 0.24s ease both;
+    }
+    @keyframes info-shader-in { from { opacity: 0; } to { opacity: 1; } }
+    .info-layer-dialog {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 1024px; max-height: 100%; overflow: auto;
+      border: 1px solid transparent;
+      border-radius: var(--radius-card);
+      background-image: linear-gradient(134deg, var(--surface-hover) 0%, var(--surface-gradient-end) 100%);
+      padding: calc(var(--sys-page-margin)) calc(var(--sys-page-margin)) calc(var(--sys-page-margin) + var(--sys-space-fixed-600));
+    }
+    .info-layer-dialog:focus { outline: auto 1px var(--focus-ring); }
+    .info-layer-text {
+      font-family: var(--font-copy);
+      font-variation-settings: var(--fvs-copy);
+      font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1);
+      color: var(--text-muted); white-space: pre-line;
+    }
+    .info-layer-link {
+      display: inline-block; margin-top: 15px;
+      font-size: var(--sys-fs-copy-order2); line-height: var(--sys-lh-copy-order2);
+    }
+    .info-layer-close { position: absolute; top: var(--sys-space-fixed-100); right: var(--sys-space-fixed-100); }
+    @media (min-width: 1024px) {
+      .info-layer { align-items: center; }
+      .info-layer-dialog { padding: var(--sys-space-fixed-800); }
     }
 
     /* ── TYPOGRAPHY TOKENS ─────────────────────────────────────────────── */
@@ -838,33 +934,29 @@
       .footnotes { padding: 3px 18px 3px 19px; }
     }
     @media (min-width: 768px) and (max-width: 1023px) {
-      .section-model { gap: 56px; }
+      .section-model { gap: var(--sys-space-fixed-700); }
     }
     @media (min-width: 768px) {
       .footnotes { padding: 3px 35px; }
-      .fuel-prices-row { display: flex; column-gap: 52px; }
-      .fuel-price-item {
-        display: flex; align-items: center; column-gap: 8px;
-      }
-      .fuel-price-item .fuel-price-label { margin-bottom: 8px; }
+      .fuel-prices-row { display: flex; column-gap: 52px; margin-top: var(--sys-space-fixed-100); }
+      .fuel-price-item { display: flex; align-items: center; column-gap: var(--sys-space-fixed-100); }
+      .fuel-price-item .fuel-price-label { margin-bottom: var(--sys-space-fixed-100); }
       .fuel-price-item .price-field { width: 138px; flex: none; }
       .fuel-price-item:last-child .price-field { width: 135px; }
-      .fuel-prices-row { margin-top: 8px; }
     }
     @media (min-width: 1024px) {
-      .page-layout { padding-top: 28px; }
-      .header h1 { font-size: 28px; line-height: 40px; }
-      .section-group { display: grid; grid-template-columns: 4fr 2.2fr; gap: 40px; align-items: start; }
+      .page-layout { padding-top: var(--sys-space-relative-xl); }
+      .section-group { display: grid; grid-template-columns: 4fr 2.2fr; gap: var(--sys-space-fixed-500); align-items: start; }
       .section-input {
         width: auto;
         border: 1px solid var(--border-card);
         border-radius: var(--radius-card);
-        padding: 40px;
+        padding: var(--sys-space-fixed-500);
       }
-      .section-output { width: auto; gap: 28px; }
-      .charge-loc-list { gap: 16px; }
+      .section-output { width: auto; gap: var(--sys-space-relative-xl); }
+      .charge-loc-list { gap: var(--sys-space-fixed-200); }
       .charge-loc-row { grid-template-rows: auto 1fr; }
-      .charge-loc-label { padding-bottom: 20px; }
+      .charge-loc-label { padding-bottom: var(--sys-space-fixed-250); }
       .charge-loc-text, .charge-loc-value { display: inline; }
       .charge-loc-slider-wrap { grid-column: 1; }
       .charge-loc-input-wrap { grid-row: 1 / span 2; }
@@ -872,15 +964,15 @@
       .fuel-price-item .price-field { width: 108px; }
       .fuel-price-item:last-child .price-field { width: 106px; }
       .footnotes { padding: 3px; }
-      .faq { margin-top: 36px; }
+      .faq { margin-top: var(--sys-space-fixed-450); }
     }
     @media (min-width: 1440px) {
-      .page-layout { padding-top: 32px; padding-bottom: 32px; }
+      .page-layout { padding-top: var(--sys-space-fixed-400); padding-bottom: var(--sys-space-fixed-400); }
       .header { margin-bottom: 47px; }
-      .header h1 { font-size: 32px; line-height: 44px; margin-top: 7px; }
-      .section-group { gap: 56px; }
-      .section-input { padding: 56px; }
-      .section-output { gap: 32px; }
+      .header h1 { margin-top: 7px; }
+      .section-group { gap: var(--sys-space-fixed-700); }
+      .section-input { padding: var(--sys-space-fixed-700); }
+      .section-output { gap: var(--sys-space-fixed-400); }
       .fuel-prices-row { column-gap: 52px; }
       .fuel-price-item .price-field { width: 138px; }
       .fuel-price-item:last-child .price-field { width: 135px; }
@@ -888,9 +980,8 @@
     @media (min-width: 1920px) {
       .reset-row { margin-top: 0; }
       .header { margin-bottom: 73px; }
-      .header h1 { font-size: 36px; line-height: 52px; margin-top: 4px; }
-      .faq { margin-top: 80px; }
-      .faq-title { width: fit-content; max-width: 100%; margin-inline: auto; text-align: center; }
+      .header h1 { margin-top: 4px; }
+      .faq { margin-top: var(--sys-space-fixed-1000); }
     }
 
   </style>
@@ -965,7 +1056,7 @@
       <!-- Q1: Driving distribution -->
       <div class="combo">
         <div class="question">
-          <span class="question-text">Where do you travel and how <span class="question-end">often?<button class="info-btn" aria-label="More info">
+          <span class="question-text" id="q-distr">Where do you travel and how <span class="question-end">often?<button class="info-btn" type="button" data-info="driving" aria-label="More information: Driving profile">
               <img src="assets/icons/info.svg" width="16" height="16" alt="">
             </button></span></span>
         </div>
@@ -994,7 +1085,7 @@
                 </div>
                 <!-- Handle 1 -->
                 <div class="distr-handle distr-handle-top" id="handle1" style="left:33.33%">
-                  <div class="distr-thumb">
+                  <div class="distr-thumb" role="slider" tabindex="0" id="handle1-thumb" data-handle="left" aria-labelledby="q-distr" aria-describedby="distr-values" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                     <div class="distr-thumb-arrows">
                       <img src="assets/icons/arrow-left.svg" width="7" height="13" alt="">
                       <img src="assets/icons/arrow-right.svg" width="7" height="13" alt="" style="transform:scaleX(-1)">
@@ -1003,7 +1094,7 @@
                 </div>
                 <!-- Handle 2 -->
                 <div class="distr-handle distr-handle-bottom" id="handle2" style="left:66.67%">
-                  <div class="distr-thumb">
+                  <div class="distr-thumb" role="slider" tabindex="0" id="handle2-thumb" data-handle="right" aria-labelledby="q-distr" aria-describedby="distr-values" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                     <div class="distr-thumb-arrows">
                       <img src="assets/icons/arrow-left.svg" width="7" height="13" alt="">
                       <img src="assets/icons/arrow-right.svg" width="7" height="13" alt="" style="transform:scaleX(-1)">
@@ -1013,7 +1104,7 @@
               </div>
             </div>
           </div>
-          <div class="distr-labels">
+          <div class="distr-labels" id="distr-values">
             <div class="distr-label-col">
               <span class="distr-pct" id="pct-city">33%</span>
               <span class="distr-name">City</span>
@@ -1033,7 +1124,7 @@
       <!-- Q2: Annual mileage -->
       <div class="combo">
         <div class="question">
-          <span class="question-text">How many miles do you drive a <span class="question-end">year?<button class="info-btn" aria-label="More info">
+          <span class="question-text">How many miles do you drive a <span class="question-end">year?<button class="info-btn" type="button" data-info="mileage" aria-label="More information: Annual mileage">
               <img src="assets/icons/info.svg" width="16" height="16" alt="">
             </button></span></span>
         </div>
@@ -1058,7 +1149,7 @@
       <!-- Q3: We Charge Tariff -->
       <div class="combo" id="combo-wecharge">
         <div class="question">
-          <span class="question-text">Would you like to consider the most suitable We Charge <span class="question-end">Tariff?<sup class="fn-ref">2</sup><button class="info-btn" aria-label="More info">
+          <span class="question-text">Would you like to consider the most suitable We Charge <span class="question-end">Tariff?<sup class="fn-ref">2</sup><button class="info-btn" type="button" data-info="wecharge" aria-label="More information: We Charge tariff">
               <img src="assets/icons/info.svg" width="16" height="16" alt="">
             </button></span></span>
         </div>
@@ -1083,7 +1174,7 @@
       <!-- Q4: Charging location and frequency -->
       <div class="combo">
         <div class="question">
-          <span class="question-text">Where do you charge your vehicle and how <span class="question-end">often?<button class="info-btn" aria-label="More info">
+          <span class="question-text">Where do you charge your vehicle and how <span class="question-end">often?<button class="info-btn" type="button" data-info="charging" aria-label="More information: Charging profile">
               <img src="assets/icons/info.svg" width="16" height="16" alt="">
             </button></span></span>
         </div>
@@ -1099,7 +1190,7 @@
             <div class="charge-loc-input-wrap">
               <span class="charge-loc-unit">£ / kWh</span>
               <div class="price-field">
-                <input type="number" class="price-input" id="price-home" value="0.37" min="0" max="2" step="0.01" aria-label="Price at home in pounds per kWh">
+                <input type="number" class="price-input" id="price-home" value="0.37" min="0" max="2" step="0.1" aria-label="Price at home in pounds per kWh">
                 <button class="price-clear" type="button" aria-label="Clear" data-for="price-home">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
@@ -1117,7 +1208,7 @@
             <div class="charge-loc-input-wrap">
               <span class="charge-loc-unit">£ / kWh</span>
               <div class="price-field">
-                <input type="number" class="price-input" id="price-work" value="0.37" min="0" max="2" step="0.01" aria-label="Price at work in pounds per kWh">
+                <input type="number" class="price-input" id="price-work" value="0.37" min="0" max="2" step="0.1" aria-label="Price at work in pounds per kWh">
                 <button class="price-clear" type="button" aria-label="Clear" data-for="price-work">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
@@ -1135,7 +1226,7 @@
             <div class="charge-loc-input-wrap">
               <span class="charge-loc-unit">£ / kWh</span>
               <div class="price-field">
-                <input type="number" class="price-input" id="price-public" value="0.37" min="0" max="2" step="0.01" aria-label="Public charging price in pounds per kWh">
+                <input type="number" class="price-input" id="price-public" value="0.37" min="0" max="2" step="0.1" aria-label="Public charging price in pounds per kWh">
                 <button class="price-clear" type="button" aria-label="Clear" data-for="price-public">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
@@ -1153,7 +1244,7 @@
             <div class="charge-loc-input-wrap">
               <span class="charge-loc-unit">£ / kWh</span>
               <div class="price-field">
-                <input type="number" class="price-input" id="price-motorway" value="0.37" min="0" max="2" step="0.01" aria-label="Motorway charging price in pounds per kWh">
+                <input type="number" class="price-input" id="price-motorway" value="0.37" min="0" max="2" step="0.1" aria-label="Motorway charging price in pounds per kWh">
                 <button class="price-clear" type="button" aria-label="Clear" data-for="price-motorway">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
@@ -1164,10 +1255,10 @@
 
         <!-- Reset -->
         <div class="reset-row">
-          <button class="reset-btn" id="btn-reset">
+          <button class="text-btn reset-btn" id="btn-reset" type="button">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M4 12C4 7.6 7.6 4 12 4C15 4 17.6 5.7 18.9 8.2M20 12C20 16.4 16.4 20 12 20C9 20 6.4 18.3 5.1 15.8" stroke="#FCFCFD" stroke-linecap="round"/>
-              <path d="M19 4L19.5 8.5L15 8" stroke="#FCFCFD" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 12C4 7.6 7.6 4 12 4C15 4 17.6 5.7 18.9 8.2M20 12C20 16.4 16.4 20 12 20C9 20 6.4 18.3 5.1 15.8" stroke="currentColor" stroke-linecap="round"/>
+              <path d="M19 4L19.5 8.5L15 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span>Reset values to default values</span>
           </button>
@@ -1177,7 +1268,7 @@
       <!-- Fuel prices -->
       <div class="combo">
         <div class="question">
-          <span class="question-text">Petrol and diesel prices for comparison <span class="question-end">vehicles<button class="info-btn" aria-label="More info">
+          <span class="question-text">Petrol and diesel prices for comparison <span class="question-end">vehicles<button class="info-btn" type="button" data-info="fuel" aria-label="More information: Petrol and diesel prices">
               <img src="assets/icons/info.svg" width="16" height="16" alt="">
             </button></span></span>
         </div>
@@ -1185,7 +1276,7 @@
           <div class="fuel-price-item">
             <span class="fuel-price-label">Petrol:</span>
             <div class="price-field">
-              <input type="number" class="price-input" id="price-petrol" value="1.47" min="0" max="5" step="0.01" aria-label="Petrol price in pounds per litre">
+              <input type="number" class="price-input" id="price-petrol" value="1.47" min="0" max="5" step="0.1" aria-label="Petrol price in pounds per litre">
               <button class="price-clear" type="button" aria-label="Clear" data-for="price-petrol">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
               </button>
@@ -1195,7 +1286,7 @@
           <div class="fuel-price-item">
             <span class="fuel-price-label">Diesel:</span>
             <div class="price-field">
-              <input type="number" class="price-input" id="price-diesel" value="1.52" min="0" max="5" step="0.01" aria-label="Diesel price in pounds per litre">
+              <input type="number" class="price-input" id="price-diesel" value="1.52" min="0" max="5" step="0.1" aria-label="Diesel price in pounds per litre">
               <button class="price-clear" type="button" aria-label="Clear" data-for="price-diesel">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
               </button>
@@ -1210,7 +1301,7 @@
       <!-- Q5: THG -->
       <div class="combo">
         <div class="question">
-          <span class="question-text">Would you like to take the THG into <span class="question-end">account?<button class="info-btn" aria-label="More info">
+          <span class="question-text">Would you like to take the THG into <span class="question-end">account?<button class="info-btn" type="button" data-info="thg" aria-label="More information: THG quota">
               <img src="assets/icons/info.svg" width="16" height="16" alt="">
             </button></span></span>
         </div>
@@ -1283,7 +1374,7 @@
             <p class="cons-data" id="cons-data">Power consumption (combined): 15.4 – 13.4 kWh/100 km; CO₂ emissions (combined): 0 g/km</p>
             <p>For this vehicle only consumption and emission values according to WLTP are available, not NEDC.</p>
             <p>Consumption and CO₂ emission figures are given as ranges depending on the equipment selected for the vehicle.</p>
-            <button class="cons-link" id="cons-all-toggle" type="button" aria-expanded="false" aria-controls="cons-all">Show all values</button>
+            <button class="text-btn cons-link" id="cons-all-toggle" type="button" aria-expanded="false" aria-controls="cons-all"><span>Show all values</span></button>
             <ul class="cons-all" id="cons-all"></ul>
           </div>
         </div>
@@ -1292,7 +1383,7 @@
       <!-- Result card -->
       <div class="section-result" id="section-result">
         <div class="result-main">
-          <p class="result-headline"><span class="result-label">Estimated <span class="question-end">cost<sup class="fn-ref">1</sup><button class="info-btn" aria-label="More info">
+          <p class="result-headline"><span class="result-label">Estimated <span class="question-end">cost<sup class="fn-ref">1</sup><button class="info-btn" type="button" data-info="result" aria-label="More information: Estimated cost">
               <img src="assets/icons/info.svg" width="16" height="16" alt="">
             </button></span></span></p>
           <div class="result-value-group">
@@ -1349,22 +1440,22 @@
   <section class="faq" aria-labelledby="faq-title">
     <h2 class="faq-title" id="faq-title">Explanations and tips on the topics of cost and comparison</h2>
     <div class="faq-list">
-      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q1" aria-expanded="false" aria-controls="faq-a1"><span class="faq-btn-text">Can electric vehicles also be charged for free?</span><img class="faq-chevron" src="assets/icons/chevron-down.svg" width="24" height="24" alt=""></button></h3></div>
+      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q1" aria-expanded="false" aria-controls="faq-a1"><span class="faq-btn-text">Can electric vehicles also be charged for free?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
       <div class="faq-panel" id="faq-a1" role="region" aria-labelledby="faq-q1"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
-      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q2" aria-expanded="false" aria-controls="faq-a2"><span class="faq-btn-text">Why are there special charging tariffs?</span><img class="faq-chevron" src="assets/icons/chevron-down.svg" width="24" height="24" alt=""></button></h3></div>
+      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q2" aria-expanded="false" aria-controls="faq-a2"><span class="faq-btn-text">Why are there special charging tariffs?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
       <div class="faq-panel" id="faq-a2" role="region" aria-labelledby="faq-q2"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
-      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q3" aria-expanded="false" aria-controls="faq-a3"><span class="faq-btn-text">How can I charge cheaply at home?</span><img class="faq-chevron" src="assets/icons/chevron-down.svg" width="24" height="24" alt=""></button></h3></div>
+      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q3" aria-expanded="false" aria-controls="faq-a3"><span class="faq-btn-text">How can I charge cheaply at home?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
       <div class="faq-panel" id="faq-a3" role="region" aria-labelledby="faq-q3"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
-      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q4" aria-expanded="false" aria-controls="faq-a4"><span class="faq-btn-text">How do I find out what charging at a charging station costs?</span><img class="faq-chevron" src="assets/icons/chevron-down.svg" width="24" height="24" alt=""></button></h3></div>
+      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q4" aria-expanded="false" aria-controls="faq-a4"><span class="faq-btn-text">How do I find out what charging at a charging station costs?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
       <div class="faq-panel" id="faq-a4" role="region" aria-labelledby="faq-q4"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
-      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q5" aria-expanded="false" aria-controls="faq-a5"><span class="faq-btn-text">Why do prices differ so much between charging stations?</span><img class="faq-chevron" src="assets/icons/chevron-down.svg" width="24" height="24" alt=""></button></h3></div>
+      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q5" aria-expanded="false" aria-controls="faq-a5"><span class="faq-btn-text">Why do prices differ so much between charging stations?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
       <div class="faq-panel" id="faq-a5" role="region" aria-labelledby="faq-q5"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
-      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q6" aria-expanded="false" aria-controls="faq-a6"><span class="faq-btn-text">Why does charging on the motorway cost more?</span><img class="faq-chevron" src="assets/icons/chevron-down.svg" width="24" height="24" alt=""></button></h3></div>
+      <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q6" aria-expanded="false" aria-controls="faq-a6"><span class="faq-btn-text">Why does charging on the motorway cost more?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
       <div class="faq-panel" id="faq-a6" role="region" aria-labelledby="faq-q6"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
     </div>
   </section>
@@ -1375,6 +1466,18 @@
 <div class="cost-sticky" id="cost-sticky" aria-hidden="true">
   <span class="cost-sticky-label">Estimated yearly cost</span>
   <span class="cost-sticky-value" id="cost-sticky-value"></span>
+</div>
+
+<!-- Info layer: opened by the info buttons (modal-like, no scroll lock) -->
+<div class="info-layer" id="info-layer" hidden>
+  <div class="info-layer-shader" id="info-layer-shader"></div>
+  <div class="info-layer-dialog" id="info-layer-dialog" role="dialog" aria-label="Opened layer" tabindex="-1">
+    <p class="info-layer-text" id="info-layer-text"></p>
+    <a class="text-btn info-layer-link" id="info-layer-link" href="#faq-title">For more information, see the FAQ below.</a>
+    <button class="info-btn info-layer-close" id="info-layer-close" type="button" aria-label="Close layer">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
 </div>
 
 <script>
@@ -1507,8 +1610,6 @@
     const digitVals = chars.filter(c => c.type === 'digit').map(c => parseInt(c.val));
     container.querySelectorAll('.slot-digit').forEach((col, i) => {
       const reel = col.querySelector('.slot-reel');
-      const delay = (digitVals.length - 1 - i) * 60;
-      reel.style.transitionDelay = delay + 'ms';
       reel.style.transform = `translateY(-${digitVals[i]}em)`;
     });
   }
@@ -1755,6 +1856,14 @@
     document.getElementById('seg-country').style.flex  = countryPct + ' 0 0%';
     document.getElementById('seg-motorway').style.flex = mwPct() + ' 0 0%';
 
+    /* slider semantics of the two handles */
+    const c = Math.round(cityPct), k = Math.round(countryPct), m = Math.round(mwPct());
+    const t1 = document.getElementById('handle1-thumb'), t2 = document.getElementById('handle2-thumb');
+    t1.setAttribute('aria-valuemin', 0);                      t1.setAttribute('aria-valuemax', Math.round(h2));
+    t1.setAttribute('aria-valuenow', c);                      t1.setAttribute('aria-valuetext', c + '% City ' + k + '% Country road');
+    t2.setAttribute('aria-valuemin', Math.round(h1));         t2.setAttribute('aria-valuemax', 100);
+    t2.setAttribute('aria-valuenow', Math.round(h2));         t2.setAttribute('aria-valuetext', k + '% Country road ' + m + '% Motorway');
+
     /* position each icon at its region's true centre, and shrink + fade it as the region nears the edge */
     const iconCentres = [h1 / 2, (h1 + h2) / 2, (h2 + 100) / 2];
     [['#icon-city', cityPct], ['#icon-country', countryPct], ['#icon-motorway', mwPct()]]
@@ -1799,6 +1908,30 @@
   document.addEventListener('mouseup',  () => { dragging = null; });
   document.addEventListener('touchend', () => { dragging = null; });
 
+  /* keyboard: Arrow Right/Up +1, Left/Down -1, PageUp +10, PageDown -10, Home = minimum, End = maximum
+     (left handle: 0 .. right handle, right handle: left handle .. 100) */
+  document.querySelectorAll('.distr-thumb').forEach(thumb => {
+    thumb.addEventListener('keydown', e => {
+      const first = thumb.dataset.handle === 'left';
+      const h1 = cityPct, h2 = cityPct + countryPct;
+      const cur = first ? h1 : h2;
+      const lo  = first ? 0 : h1, hi = first ? h2 : 100;
+      let v;
+      switch (e.key) {
+        case 'ArrowRight': case 'ArrowUp':   v = Math.round(cur) + 1;  break;
+        case 'ArrowLeft':  case 'ArrowDown': v = Math.round(cur) - 1;  break;
+        case 'PageUp':   v = Math.round(cur) + 10; break;
+        case 'PageDown': v = Math.round(cur) - 10; break;
+        case 'Home': v = lo; break;
+        case 'End':  v = hi; break;
+        default: return;
+      }
+      e.preventDefault();
+      v = clamp(v, lo, hi);
+      if (first) setHandles(v, h2); else setHandles(h1, v);
+    });
+  });
+
   handle1El.addEventListener('mousedown',  e => dragStart(e, 1));
   handle2El.addEventListener('mousedown',  e => dragStart(e, 2));
   handle1El.addEventListener('touchstart', e => dragStart(e, 1), { passive: false });
@@ -1833,16 +1966,63 @@
     });
   });
 
+  /* ── INFO LAYER ── */
+  const INFO_TEXT = {
+    driving:  'Define your personal driving profile. Choose which share of your annual mileage you drive in the city, on country roads and on the motorway.\n\nDepending on the profile, based on the WLTP sub-profiles, a consumption forecast is calculated and, from it, the estimated running costs of your electric vehicle. Driving at high speed on the motorway, for example, uses considerably more energy than city driving.\n\nActual consumption and costs may differ in practice.',
+    mileage:  'Set how many miles you drive in a typical year. The estimated running costs and CO₂ emissions are calculated for this annual mileage.',
+    wecharge: 'Choose whether the most suitable We Charge tariff should be taken into account. The tariff determines the prices for charging in public and on the motorway.',
+    charging: 'Define your personal charging profile. Choose how often you charge at home, at work, in public and on the motorway, from "never" to "very often".\n\nEach location contributes to the total cost in proportion to its setting compared with the sum of all settings. You can enter the prices you know for charging at home and at work yourself; public and motorway prices are taken from the selected We Charge tariff.',
+    fuel:     'Enter the current petrol and diesel prices per litre. They are used to compare the running costs of your electric vehicle with a petrol and a diesel vehicle.',
+    thg:      'The THG quota is a bonus for owners of electric vehicles. If you choose to take it into account, it reduces the estimated running costs.',
+    result:   'Estimated costs and CO₂ emissions in operation per year, based on the parameters you selected. The actual values may differ.'
+  };
+  const infoLayer  = document.getElementById('info-layer');
+  const infoDialog = document.getElementById('info-layer-dialog');
+  const infoLink   = document.getElementById('info-layer-link');
+  const infoClose  = document.getElementById('info-layer-close');
+  let infoOpener = null;
+  function openInfo(btn) {
+    infoOpener = btn;
+    document.getElementById('info-layer-text').textContent = INFO_TEXT[btn.dataset.info] || '';
+    infoLayer.hidden = false;
+    infoDialog.focus();
+  }
+  function closeInfo() {
+    if (infoLayer.hidden) return;
+    infoLayer.hidden = true;
+    if (infoOpener) infoOpener.focus();
+    infoOpener = null;
+  }
+  document.querySelectorAll('.info-btn[data-info]').forEach(b => b.addEventListener('click', () => openInfo(b)));
+  document.getElementById('info-layer-shader').addEventListener('click', closeInfo);
+  infoClose.addEventListener('click', closeInfo);
+  infoLink.addEventListener('click', closeInfo);
+  document.addEventListener('keydown', e => {
+    if (infoLayer.hidden) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeInfo(); return; }
+    if (e.key !== 'Tab') return;
+    // focus cycles dialog -> link -> close button -> link ...
+    const a = document.activeElement;
+    let next;
+    if (!e.shiftKey) next = a === infoDialog ? infoLink : a === infoLink ? infoClose : infoLink;
+    else             next = a === infoLink ? infoClose : a === infoClose ? infoLink : infoClose;
+    e.preventDefault();
+    next.focus();
+  });
+
   /* ── STICKY RESULT BAR (CSS shows it below 1024px only) ──
      Visible while the end of the input card is still below the viewport; slides out once it comes into view
-     (the result card is then right below) or has been scrolled past. */
+     (the result card is then right below) or has been scrolled past. A scroll listener is used (not an
+     IntersectionObserver) so that jumps past the card, e.g. via the FAQ link, are handled as well. */
   const costSticky = document.getElementById('cost-sticky');
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(entries => {
-      const e = entries[entries.length - 1];
-      costSticky.classList.toggle('is-hidden', e.isIntersecting || e.boundingClientRect.top < 0);
-    }).observe(document.getElementById('input-end-sentinel'));
+  const inputEnd   = document.getElementById('input-end-sentinel');
+  function syncSticky() {
+    // hidden once the end of the input card is inside the viewport or above it
+    costSticky.classList.toggle('is-hidden', inputEnd.getBoundingClientRect().top < window.innerHeight);
   }
+  window.addEventListener('scroll', syncSticky, { passive: true });
+  window.addEventListener('resize', syncSticky);
+  syncSticky();
 </script>
 </body>
 </html>
