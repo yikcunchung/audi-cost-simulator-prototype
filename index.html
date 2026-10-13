@@ -49,10 +49,20 @@
       --border-light-0:         rgba(219,223,230,0);
       --border-focus:           #dbdfe6;
       --border-sticky:          #dfe4e8;
+      --border-layer:           var(--surface-selected-hover);   /* info layer dialog border (#37404e) */
       --focus-ring:             #005fcc;
       --ds3-duration:           0.25s;
       --ds3-ease:               cubic-bezier(0.75, 0.02, 0.5, 1);
       --motion-reel:            1s ease;               /* result digit reels: all columns slide together */
+      --motion-layer-slide:     420ms;                 /* info layer: slide in (bottom sheet / rise) */
+      --motion-layer-fade:      240ms;                 /* info layer: shader and dialog fade in */
+      --motion-sticky:          0.2s;                  /* mobile sticky result bar: slide away */
+      --blur-sticky:            blur(60px);
+      --z-sticky:               10;
+      --z-layer:                1000;
+      --z-layer-close:          100;
+      --layer-max-width:        var(--sys-breakpoint-lg);
+      --layer-link-gap:         15px;                  /* paragraph -> link line inside the info layer (no DS3 token) */
       --radius-card:       20px;
       --radius-input:      10px;
       --radius-pill:       999px;
@@ -207,7 +217,6 @@
       font-family: var(--font-copy);
       font-variation-settings: 'wdth' 105, 'wght' 400;
       color: var(--text-primary);
-      -webkit-font-smoothing: antialiased;
     }
     body {
       max-width: var(--max-content-width);
@@ -312,8 +321,8 @@
       background-color: var(--surface-transparent);
       border: 1px solid var(--border-light-0);
       border-radius: var(--radius-pill);
-      transition: color var(--ds3-duration) var(--ds3-ease), box-shadow var(--ds3-duration) var(--ds3-ease),
-                  border-color var(--ds3-duration) var(--ds3-ease), background-color var(--ds3-duration) var(--ds3-ease);
+      transition-property: color, box-shadow, border-color, background-color;
+      transition-duration: var(--ds3-duration); transition-timing-function: var(--ds3-ease);
     }
     .info-btn:hover, .info-btn:active {
       background-color: var(--surface-hover);
@@ -323,7 +332,9 @@
       display: inline-flex; vertical-align: middle;
       margin-left: var(--sys-space-fixed-50); margin-right: calc(var(--sys-space-fixed-150) * -1);
     }
-    .info-btn svg, .info-btn img { width: var(--sys-space-fixed-200); height: var(--sys-space-fixed-200); }
+    /* 16px glyph = inline svg (<use> of the xs sprite symbols), painted crisply at the button's (10,10) offset */
+    .info-btn svg { display: block; flex-shrink: 0; width: var(--sys-space-fixed-200); height: var(--sys-space-fixed-200); }
+    .svg-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
     sup.fn-ref {
       font-size: var(--sys-fs-copy-order3);
@@ -653,7 +664,8 @@
       font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1); color: var(--text-muted);
     }
     .select-group { display: flex; gap: var(--select-gap); }
-    .select-group > div { flex: 0 0 calc((100% - var(--select-gap)) / 2); min-width: 0; }
+    /* two selects share the row equally; when the powertrain select is hidden the Model select fills the whole row */
+    .select-group > div { flex: 1 1 0; min-width: 0; }
     .select-sub-label {
       font-family: var(--font-copy);
       font-variation-settings: var(--fvs-copy);
@@ -706,8 +718,8 @@
     .cost-value {
       font-family: var(--font-headline);
       font-variation-settings: var(--fvs-headline);
-      font-size: var(--sys-fs-display-order1);
-      line-height: var(--sys-lh-display-order1);
+      font-size: var(--sys-fs-display-order2);
+      line-height: var(--sys-lh-display-order2);
       color: var(--text-primary);
       display: flex; align-items: baseline;
     }
@@ -717,7 +729,7 @@
     .range-unit {
       font-family: var(--font-headline);
       font-variation-settings: var(--fvs-headline);
-      font-size: var(--sys-fs-display-order1); line-height: var(--sys-lh-display-order1);
+      font-size: var(--sys-fs-display-order2); line-height: var(--sys-lh-display-order2);
       color: var(--text-primary);
     }
     .cost-stats-grid {
@@ -761,13 +773,14 @@
     }
 
     /* ── STICKY RESULT BAR (below 1024px) ───────────────────────────────── */
+    /* live: fixed, bottom 0, right -64px (the box is 100vw + 64px wide), 10% fill, opaque 1px top border, blur 60px, `transition: transform 0.2s` */
     .cost-sticky {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+      position: fixed; left: 0; right: calc(var(--sys-space-fixed-800) * -1); bottom: 0; z-index: var(--z-sticky);
       padding: var(--sys-space-fixed-200) var(--sys-space-fixed-400);
-      background: var(--surface-card);
-      -webkit-backdrop-filter: blur(60px); backdrop-filter: blur(60px);
+      background-color: var(--surface-card);
+      -webkit-backdrop-filter: var(--blur-sticky); backdrop-filter: var(--blur-sticky);
       border-top: 1px solid var(--border-sticky);
-      transition: transform 250ms var(--ds3-ease);
+      transition: transform var(--motion-sticky);
     }
     .cost-sticky.is-hidden { transform: translateY(100%); }
     @media (min-width: 1024px) { .cost-sticky { display: none; } }
@@ -850,27 +863,37 @@
       font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1); color: var(--text-muted);
     }
 
-    /* ── INFO LAYER (modal): shader + dialog (centred on desktop, bottom sheet below 1024px) ── */
-    .info-layer {
-      position: fixed; inset: 0; z-index: 1000;
-      display: flex; align-items: flex-end; justify-content: center;
-    }
-    .info-layer[hidden] { display: none; }
+    /* ── INFO LAYER (modal): same structure and CSS as the live OneLayer ──
+       two fixed siblings (shader, outer) > frame > open-animation wrapper > native <dialog open>.
+       < 768px: bottom sheet (translateY(100%) -> 0, no fade); >= 768px: centred, rises 40px and fades in. */
+    .info-layer-shader, .info-layer-outer { position: fixed; inset: 0; z-index: var(--z-layer); }
     .info-layer-shader {
-      position: absolute; inset: 0;
       background-color: var(--surface-shader);
-      animation: info-shader-in 0.24s ease both;
+      animation: info-layer-fade var(--motion-layer-fade) var(--ds3-ease);
     }
-    @keyframes info-shader-in { from { opacity: 0; } to { opacity: 1; } }
+    .info-layer-outer {
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    }
+    .info-layer-frame { width: min(100%, var(--layer-max-width)); max-height: 100%; }
+    .info-layer-open {
+      display: flex; justify-content: center; max-height: 100%;
+      animation: info-layer-sheet var(--motion-layer-slide) var(--ds3-ease) forwards;
+    }
+    @keyframes info-layer-fade  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes info-layer-sheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes info-layer-rise  { from { transform: translateY(var(--sys-space-fixed-500)); } to { transform: translateY(0); } }
     .info-layer-dialog {
-      position: relative; z-index: 1;
-      width: 100%; max-width: 1024px; max-height: 100%; overflow: auto;
-      border: 1px solid transparent;
-      border-radius: var(--radius-card);
+      position: relative; display: flex; flex-direction: column; justify-content: center;
+      width: 100%; max-width: none; height: auto; max-height: 100%; margin: 0; padding: 0; overflow: visible;
+      border: 1px solid var(--border-layer);
+      border-radius: var(--radius-card) var(--radius-card) 0 0;
+      background-color: transparent;
       background-image: linear-gradient(134deg, var(--surface-hover) 0%, var(--surface-gradient-end) 100%);
-      padding: calc(var(--sys-page-margin)) calc(var(--sys-page-margin)) calc(var(--sys-page-margin) + var(--sys-space-fixed-600));
+      color: var(--text-primary);
     }
-    .info-layer-dialog:focus { outline: auto 1px var(--focus-ring); }
+    /* focus: no ring after a mouse open (only the 1px border); the global :focus-visible ring appears for keyboard use */
+    .info-layer-scroll { max-height: 100vh; overflow: auto; }
+    .info-layer-content { padding: var(--sys-space-relative-xl); }
     .info-layer-text {
       font-family: var(--font-copy);
       font-variation-settings: var(--fvs-copy);
@@ -878,14 +901,30 @@
       color: var(--text-muted); white-space: pre-line;
     }
     .info-layer-link {
-      display: inline-block; margin-top: 15px;
+      display: inline-block; margin-top: var(--layer-link-gap);
       font-size: var(--sys-fs-copy-order2); line-height: var(--sys-lh-copy-order2);
     }
-    .info-layer-close { position: absolute; top: var(--sys-space-fixed-100); right: var(--sys-space-fixed-100); }
-    @media (min-width: 1024px) {
-      .info-layer { align-items: center; }
-      .info-layer-dialog { padding: var(--sys-space-fixed-800); }
+    .info-layer-close-wrap {
+      position: absolute; top: var(--sys-space-fixed-100); right: var(--sys-space-fixed-100); z-index: var(--z-layer-close);
+      display: flex; justify-content: flex-end;
     }
+    @media (min-width: 768px) {
+      .info-layer-outer { justify-content: center; }
+      .info-layer-open {
+        animation: info-layer-rise var(--motion-layer-slide) var(--ds3-ease) forwards,
+                   info-layer-fade var(--motion-layer-fade) var(--ds3-ease) forwards;
+      }
+      .info-layer-content { padding: var(--sys-space-fixed-600); }
+    }
+    @media (min-width: 1024px) {
+      .info-layer-dialog { border-radius: var(--radius-card); }
+      .info-layer-content { padding: var(--sys-space-fixed-700); }
+    }
+    @media (min-width: 1440px) {
+      .info-layer-content { padding: var(--sys-space-fixed-800); }
+    }
+    /* while the layer is open the body is fixed (scroll lock); keep the centred page column on wide screens */
+    body { inset-inline: 0; }
 
     /* ── TYPOGRAPHY TOKENS ─────────────────────────────────────────────── */
     .sys-type-copy-order1-normal { font-family: var(--font-copy); font-variation-settings: 'wdth' 105, 'wght' 400; font-size: 1rem;      line-height: 1.5rem;  letter-spacing: 0; }
@@ -987,6 +1026,12 @@
   </style>
 </head>
 <body>
+<!-- 16px (xs) icon sprite: info-circle and close, referenced with <use> so they stay crisp and follow currentColor.
+     The circle is built from arcs (not bezier curves) so the browser rasterises it as a true oval: symmetric, pixel-identical to the live glyph. -->
+<svg class="svg-sprite" aria-hidden="true" focusable="false">
+  <symbol id="icon-info-xs" viewBox="0 0 16 16"><path d="M8 12.5V7M8 5.5V3.5M8 .5A7.5 7.5 0 1 0 8 15.5 7.5 7.5 0 1 0 8 .5Z" fill="none" stroke="currentColor"/></symbol>
+  <symbol id="icon-close-xs" viewBox="0 0 16 16"><path d="M3 3L13 13M13.25 3L3.25 13" fill="none" stroke="currentColor"/></symbol>
+</svg>
 <!-- ── TOPBAR ─────────────────────────────────────────────────────────── -->
 <nav class="topbar">
   <!-- Mobile left: hamburger + Menu (hidden on desktop) -->
@@ -1057,7 +1102,7 @@
       <div class="combo">
         <div class="question">
           <span class="question-text" id="q-distr">Where do you travel and how <span class="question-end">often?<button class="info-btn" type="button" data-info="driving" aria-label="More information: Driving profile">
-              <img src="assets/icons/info.svg" width="16" height="16" alt="">
+              <svg width="16" height="16" fill="none" aria-hidden="true"><use href="#icon-info-xs"/></svg>
             </button></span></span>
         </div>
 
@@ -1125,7 +1170,7 @@
       <div class="combo">
         <div class="question">
           <span class="question-text">How many miles do you drive a <span class="question-end">year?<button class="info-btn" type="button" data-info="mileage" aria-label="More information: Annual mileage">
-              <img src="assets/icons/info.svg" width="16" height="16" alt="">
+              <svg width="16" height="16" fill="none" aria-hidden="true"><use href="#icon-info-xs"/></svg>
             </button></span></span>
         </div>
         <div class="slider-temp">
@@ -1150,7 +1195,7 @@
       <div class="combo" id="combo-wecharge">
         <div class="question">
           <span class="question-text">Would you like to consider the most suitable We Charge <span class="question-end">Tariff?<sup class="fn-ref">2</sup><button class="info-btn" type="button" data-info="wecharge" aria-label="More information: We Charge tariff">
-              <img src="assets/icons/info.svg" width="16" height="16" alt="">
+              <svg width="16" height="16" fill="none" aria-hidden="true"><use href="#icon-info-xs"/></svg>
             </button></span></span>
         </div>
         <div class="radio-group">
@@ -1175,7 +1220,7 @@
       <div class="combo">
         <div class="question">
           <span class="question-text">Where do you charge your vehicle and how <span class="question-end">often?<button class="info-btn" type="button" data-info="charging" aria-label="More information: Charging profile">
-              <img src="assets/icons/info.svg" width="16" height="16" alt="">
+              <svg width="16" height="16" fill="none" aria-hidden="true"><use href="#icon-info-xs"/></svg>
             </button></span></span>
         </div>
         <div class="charge-loc-list">
@@ -1269,7 +1314,7 @@
       <div class="combo">
         <div class="question">
           <span class="question-text">Petrol and diesel prices for comparison <span class="question-end">vehicles<button class="info-btn" type="button" data-info="fuel" aria-label="More information: Petrol and diesel prices">
-              <img src="assets/icons/info.svg" width="16" height="16" alt="">
+              <svg width="16" height="16" fill="none" aria-hidden="true"><use href="#icon-info-xs"/></svg>
             </button></span></span>
         </div>
         <div class="fuel-prices-row">
@@ -1302,7 +1347,7 @@
       <div class="combo">
         <div class="question">
           <span class="question-text">Would you like to take the THG into <span class="question-end">account?<button class="info-btn" type="button" data-info="thg" aria-label="More information: THG quota">
-              <img src="assets/icons/info.svg" width="16" height="16" alt="">
+              <svg width="16" height="16" fill="none" aria-hidden="true"><use href="#icon-info-xs"/></svg>
             </button></span></span>
         </div>
         <div class="radio-group">
@@ -1384,7 +1429,7 @@
       <div class="section-result" id="section-result">
         <div class="result-main">
           <p class="result-headline"><span class="result-label">Estimated <span class="question-end">cost<sup class="fn-ref">1</sup><button class="info-btn" type="button" data-info="result" aria-label="More information: Estimated cost">
-              <img src="assets/icons/info.svg" width="16" height="16" alt="">
+              <svg width="16" height="16" fill="none" aria-hidden="true"><use href="#icon-info-xs"/></svg>
             </button></span></span></p>
           <div class="result-value-group">
             <p class="result-sub-label">Cost of electricity from:</p>
@@ -1468,17 +1513,31 @@
   <span class="cost-sticky-value" id="cost-sticky-value"></span>
 </div>
 
-<!-- Info layer: opened by the info buttons (modal-like, no scroll lock) -->
-<div class="info-layer" id="info-layer" hidden>
-  <div class="info-layer-shader" id="info-layer-shader"></div>
-  <div class="info-layer-dialog" id="info-layer-dialog" role="dialog" aria-label="Opened layer" tabindex="-1">
-    <p class="info-layer-text" id="info-layer-text"></p>
-    <a class="text-btn info-layer-link" id="info-layer-link" href="#faq-title">For more information, see the FAQ below.</a>
-    <button class="info-btn info-layer-close" id="info-layer-close" type="button" aria-label="Close layer">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    </button>
+<!-- Info layer: opened by the info buttons. Same structure as the live OneLayer: shader and outer are fixed siblings (z-index 1000);
+     outer > frame > open-animation wrapper > native <dialog open>. The nodes are added to the page when a layer opens and removed
+     immediately when it closes (no exit animation), as on the live page. -->
+<template id="info-layer-template">
+<div class="info-layer-shader" id="info-layer-shader"></div>
+<div class="info-layer-outer" id="info-layer-outer">
+  <div class="info-layer-frame">
+    <div class="info-layer-open">
+      <dialog class="info-layer-dialog" id="info-layer-dialog" open role="dialog" aria-modal="true" aria-label="Opened layer" tabindex="-1">
+        <div class="info-layer-scroll">
+          <div class="info-layer-content">
+            <p class="info-layer-text" id="info-layer-text"></p>
+            <a class="text-btn info-layer-link" id="info-layer-link" href="#faq-title">For more information, see the FAQ below.</a>
+          </div>
+        </div>
+        <div class="info-layer-close-wrap">
+          <button class="info-btn info-layer-close" id="info-layer-close" type="button" aria-label="Close layer">
+            <svg width="16" height="16" fill="none" aria-hidden="true"><use href="#icon-close-xs"/></svg>
+          </button>
+        </div>
+      </dialog>
+    </div>
   </div>
 </div>
+</template>
 
 <script>
   /* ── MODEL CONFIG ── */
@@ -1976,29 +2035,56 @@
     thg:      'The THG quota is a bonus for owners of electric vehicles. If you choose to take it into account, it reduces the estimated running costs.',
     result:   'Estimated costs and CO₂ emissions in operation per year, based on the parameters you selected. The actual values may differ.'
   };
-  const infoLayer  = document.getElementById('info-layer');
-  const infoDialog = document.getElementById('info-layer-dialog');
-  const infoLink   = document.getElementById('info-layer-link');
-  const infoClose  = document.getElementById('info-layer-close');
-  let infoOpener = null;
-  function openInfo(btn) {
-    infoOpener = btn;
-    document.getElementById('info-layer-text').textContent = INFO_TEXT[btn.dataset.info] || '';
-    infoLayer.hidden = false;
-    infoDialog.focus();
+  const infoTpl    = document.getElementById('info-layer-template').content;
+  const infoShader = infoTpl.getElementById('info-layer-shader');
+  const infoOuter  = infoTpl.getElementById('info-layer-outer');
+  const infoDialog = infoTpl.getElementById('info-layer-dialog');
+  const infoText   = infoTpl.getElementById('info-layer-text');
+  const infoLink   = infoTpl.getElementById('info-layer-link');
+  const infoClose  = infoTpl.getElementById('info-layer-close');
+  const SCROLL_LOCK_DELAY = 525;   // live: the body is locked ~525ms after the layer opens
+  let infoOpener = null, infoLockTimer = null, infoLockedY = null;
+
+  /* scroll lock: body fixed at -scrollY (as live); cleared and the scroll position restored on close */
+  function lockScroll() {
+    infoLockedY = window.scrollY;
+    const st = document.body.style;
+    st.top = -infoLockedY + 'px'; st.position = 'fixed'; st.width = '100%';
   }
+  function unlockScroll() {
+    clearTimeout(infoLockTimer); infoLockTimer = null;
+    if (infoLockedY === null) return;
+    const st = document.body.style;
+    st.removeProperty('top'); st.removeProperty('position'); st.removeProperty('width');
+    window.scrollTo(0, infoLockedY);
+    infoLockedY = null;
+  }
+  function openInfo(btn) {
+    if (infoOuter.isConnected) return;
+    infoOpener = btn;
+    infoText.textContent = INFO_TEXT[btn.dataset.info] || '';
+    document.body.append(infoShader, infoOuter);             // adding the nodes starts the open animations
+    infoDialog.focus({ preventScroll: true });
+    infoLockTimer = setTimeout(lockScroll, SCROLL_LOCK_DELAY);
+  }
+  /* closing removes the layer immediately: no exit animation */
   function closeInfo() {
-    if (infoLayer.hidden) return;
-    infoLayer.hidden = true;
-    if (infoOpener) infoOpener.focus();
-    infoOpener = null;
+    if (!infoOuter.isConnected) return;
+    infoShader.remove(); infoOuter.remove();
+    unlockScroll();
+    const opener = infoOpener; infoOpener = null;
+    if (opener) opener.focus({ preventScroll: true });
   }
   document.querySelectorAll('.info-btn[data-info]').forEach(b => b.addEventListener('click', () => openInfo(b)));
-  document.getElementById('info-layer-shader').addEventListener('click', closeInfo);
+  // click outside the dialog (on the outer area or the shader) closes; a drag that started inside (text selection) does not
+  let infoDownOutside = false;
+  infoOuter.addEventListener('mousedown', e => { infoDownOutside = !infoDialog.contains(e.target); });
+  infoOuter.addEventListener('click', e => { if (infoDownOutside && !infoDialog.contains(e.target)) closeInfo(); infoDownOutside = false; });
+  infoShader.addEventListener('click', closeInfo);
   infoClose.addEventListener('click', closeInfo);
   infoLink.addEventListener('click', closeInfo);
   document.addEventListener('keydown', e => {
-    if (infoLayer.hidden) return;
+    if (!infoOuter.isConnected) return;
     if (e.key === 'Escape') { e.preventDefault(); closeInfo(); return; }
     if (e.key !== 'Tab') return;
     // focus cycles dialog -> link -> close button -> link ...
