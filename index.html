@@ -257,15 +257,13 @@
     /* ── LAYOUT VARIABLES (page-level, from the live layout) ───────────── */
     :root {
       --q-gap: var(--sys-space-relative-xl);      /* vertical gap between questions: 28 up to 1024, 32 from 1440 */
-      --select-gap: var(--sys-space-fixed-150);   /* gap between the two selects */
+
       --vw-24: calc(min(100vw, var(--max-content-width)) / 24);
       --distr-pad: var(--vw-24);
       --distr-thumb: 28px;                        /* distribution handle (28px round slider thumb) */
     }
-    @media (min-width: 768px)  { :root { --select-gap: var(--sys-space-relative-xl); } }
-    @media (min-width: 1024px) { :root { --select-gap: var(--sys-space-fixed-150); --distr-pad: var(--sys-space-fixed-0); } }
-    @media (min-width: 1440px) { :root { --q-gap: var(--sys-space-fixed-400); --select-gap: var(--sys-space-fixed-200); } }
-    @media (min-width: 1920px) { :root { --select-gap: var(--sys-space-fixed-300); } }
+    @media (min-width: 1024px) { :root {--distr-pad: var(--sys-space-fixed-0); } }
+    @media (min-width: 1440px) { :root { --q-gap: var(--sys-space-fixed-400);} }
 
     /* ── FOCUS ──────────────────────────────────────────────────────────── */
     :focus-visible { outline: auto 1px var(--focus-ring); }
@@ -665,9 +663,12 @@
       font-variation-settings: var(--fvs-copy);
       font-size: var(--sys-fs-copy-order1); line-height: var(--sys-lh-copy-order1); color: var(--text-muted);
     }
-    .select-group { display: flex; gap: var(--select-gap); }
-    /* two selects share the row equally; when the powertrain select is hidden the Model select fills the whole row */
-    .select-group > div { flex: 1 1 0; min-width: 0; }
+    /* live layout: three columns (1fr, 4% gap, 1fr); Model is always the first column and Powertrain the third,
+       so a lone Model select keeps its half width exactly like the live page */
+    .select-group { display: grid; grid-template-columns: minmax(0, 1fr) 4% minmax(0, 1fr); }
+    .select-group > div { min-width: 0; }
+    .select-group > div:first-child { grid-column: 1; }
+    .select-group > div:last-child { grid-column: 3; }
     .select-sub-label {
       font-family: var(--font-copy);
       font-variation-settings: var(--fvs-copy);
