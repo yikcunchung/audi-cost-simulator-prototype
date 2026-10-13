@@ -57,6 +57,8 @@
       --motion-layer-slide:     420ms;                 /* info layer: slide in (bottom sheet / rise) */
       --motion-layer-fade:      240ms;                 /* info layer: shader and dialog fade in */
       --motion-sticky:          0.2s;                  /* mobile sticky result bar: slide away */
+      --motion-faq-inner:       0.32s;                 /* FAQ answer: padding / opacity / visibility (the grid rows run on --ds3-duration) */
+      --ease-faq-inner:         ease-in;
       --blur-sticky:            blur(60px);
       --z-sticky:               10;
       --z-layer:                1000;
@@ -847,16 +849,20 @@
     .faq-btn:active { background-color: var(--surface-hover); color: var(--text-muted); }
     .faq-chevron { flex: none; width: var(--sys-space-fixed-300); height: var(--sys-space-fixed-300); display: block; transition: transform 0.2s ease-in; }
     .faq-btn[aria-expanded="true"] .faq-chevron { transform: rotate(180deg); }
+    /* exclusive accordion, same as live: the panel animates grid-template-rows 0fr -> 1fr (`all 0.25s ease`),
+       the inner (grid item) pads / fades / becomes visible over 0.32s ease-in in BOTH directions */
     .faq-panel {
-      display: grid; grid-template-rows: 0fr; visibility: hidden;
-      transition: grid-template-rows 0.25s ease, visibility 0s linear 0.25s;
+      display: grid; grid-template-rows: 0fr;
+      transition: all var(--ds3-duration) ease;
     }
-    .faq-panel.is-open { grid-template-rows: 1fr; visibility: visible; transition-delay: 0s; }
+    .faq-panel.is-open { grid-template-rows: 1fr; }
     .faq-panel-inner {
       min-height: 0; overflow: hidden; padding: 0 var(--sys-space-fixed-200);
-      transition: padding 0.25s ease;
+      opacity: 0; visibility: hidden;
+      transition-property: transform, opacity, padding, visibility;
+      transition-duration: var(--motion-faq-inner); transition-timing-function: var(--ease-faq-inner);
     }
-    .faq-panel.is-open .faq-panel-inner { padding: var(--sys-space-fixed-200); }
+    .faq-panel.is-open .faq-panel-inner { padding: var(--sys-space-fixed-200); opacity: 1; visibility: visible; }
     .faq-panel-inner p {
       font-family: var(--font-copy);
       font-variation-settings: var(--fvs-copy);
@@ -1486,22 +1492,22 @@
     <h2 class="faq-title" id="faq-title">Explanations and tips on the topics of cost and comparison</h2>
     <div class="faq-list">
       <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q1" aria-expanded="false" aria-controls="faq-a1"><span class="faq-btn-text">Can electric vehicles also be charged for free?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
-      <div class="faq-panel" id="faq-a1" role="region" aria-labelledby="faq-q1"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
+      <div class="faq-panel" id="faq-a1" role="region" aria-labelledby="faq-q1" aria-hidden="true"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
       <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q2" aria-expanded="false" aria-controls="faq-a2"><span class="faq-btn-text">Why are there special charging tariffs?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
-      <div class="faq-panel" id="faq-a2" role="region" aria-labelledby="faq-q2"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
+      <div class="faq-panel" id="faq-a2" role="region" aria-labelledby="faq-q2" aria-hidden="true"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
       <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q3" aria-expanded="false" aria-controls="faq-a3"><span class="faq-btn-text">How can I charge cheaply at home?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
-      <div class="faq-panel" id="faq-a3" role="region" aria-labelledby="faq-q3"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
+      <div class="faq-panel" id="faq-a3" role="region" aria-labelledby="faq-q3" aria-hidden="true"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
       <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q4" aria-expanded="false" aria-controls="faq-a4"><span class="faq-btn-text">How do I find out what charging at a charging station costs?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
-      <div class="faq-panel" id="faq-a4" role="region" aria-labelledby="faq-q4"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
+      <div class="faq-panel" id="faq-a4" role="region" aria-labelledby="faq-q4" aria-hidden="true"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
       <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q5" aria-expanded="false" aria-controls="faq-a5"><span class="faq-btn-text">Why do prices differ so much between charging stations?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
-      <div class="faq-panel" id="faq-a5" role="region" aria-labelledby="faq-q5"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
+      <div class="faq-panel" id="faq-a5" role="region" aria-labelledby="faq-q5" aria-hidden="true"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
 
       <div class="faq-row"><h3 class="faq-q"><button type="button" class="faq-btn" id="faq-q6" aria-expanded="false" aria-controls="faq-a6"><span class="faq-btn-text">Why does charging on the motorway cost more?</span><svg class="faq-chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10L12.5 15.5L18 10" stroke="currentColor"/></svg></button></h3></div>
-      <div class="faq-panel" id="faq-a6" role="region" aria-labelledby="faq-q6"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
+      <div class="faq-panel" id="faq-a6" role="region" aria-labelledby="faq-q6" aria-hidden="true"><div class="faq-panel-inner"><p>Answer copy to be added.</p></div></div>
     </div>
   </section>
 
@@ -2016,12 +2022,19 @@
     consAll.classList.toggle('is-open', !open);
   });
 
-  /* ── FAQ ACCORDION (items are independent) ── */
-  document.querySelectorAll('.faq-btn').forEach(btn => {
+  /* ── FAQ ACCORDION (exclusive: only one item open at a time, as live) ── */
+  const faqButtons = [...document.querySelectorAll('.faq-btn')];
+  function setFaq(btn, open) {
+    const panel = document.getElementById(btn.getAttribute('aria-controls'));
+    btn.setAttribute('aria-expanded', String(open));
+    panel.setAttribute('aria-hidden', String(!open));
+    panel.classList.toggle('is-open', open);
+  }
+  faqButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const open = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', String(!open));
-      document.getElementById(btn.getAttribute('aria-controls')).classList.toggle('is-open', !open);
+      faqButtons.forEach(b => { if (b !== btn) setFaq(b, false); });   // opening B closes A at the same moment
+      setFaq(btn, !open);                                              // clicking the open row closes it
     });
   });
 
