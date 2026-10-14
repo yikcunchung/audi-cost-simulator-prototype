@@ -97,6 +97,16 @@
       --sys-fs-headline-order3: 20px;  --sys-lh-headline-order3: 32px;
       --sys-fs-headline-order4: 16px;  --sys-lh-headline-order4: 24px;
       --sys-fs-copy-order2:  0.875rem;
+
+      /* colour tokens added for the colour clean-up (values identical to the old literals) */
+      --surface-selected:         #404a59;
+      --surface-hover:            #2c343f;
+      --surface-distr-seg-alt:    rgba(24,29,37,0.8);   /* second segment of the distribution bar */
+      --surface-option:           #1e2433;   /* native select option/optgroup background */
+      --surface-action:           #657081;   /* primary button fill (Sem/Color/Action/Primary/Surface/Fill/Default) */
+      --surface-action-hover:     #758292;   /* primary button fill on hover */
+      --border-price-focus:       rgba(252, 252, 253, 0.8);   /* price field border while focused (also the clear-button hover colour) */
+      --text-clear:               rgba(252, 252, 253, 0.5);   /* price clear button, idle */
     }
 
     /* ── CUSTOM MEDIA (CSS MQ Level 5 — postcss-custom-media compatible) ─── */
@@ -188,7 +198,6 @@
       font-family: var(--font-copy);
       font-variation-settings: 'wdth' 105, 'wght' 400;
       color: var(--text-primary);
-      -webkit-font-smoothing: antialiased;
     }
     body {
       max-width: var(--max-content-width);
@@ -254,7 +263,7 @@
       font-variation-settings: 'wdth' 105, 'wght' 600;
       font-size: 16px; line-height: 24px; letter-spacing: 0px;
       font-stretch: 105%; font-weight: 600;
-      color: rgba(252, 252, 253, 0.7); text-decoration: none;
+      color: var(--text-muted); text-decoration: none;
     }
 
     .info-btn {
@@ -279,7 +288,7 @@
       position: relative;
     }
     .distr-seg:nth-child(2) {
-      background: rgba(24,29,37,0.8);
+      background: var(--surface-distr-seg-alt);
     }
     .distr-seg svg { width: 24px; height: 24px; }
     .distr-icon {
@@ -308,9 +317,9 @@
       box-sizing: border-box;
       align-items: center; justify-content: center;
       width: 28px; height: 28px;
-      border: 1px solid rgb(77, 87, 102); border-radius: 100%;
-      background-color: rgb(16, 19, 25);
-      color: rgba(252, 252, 253, 0.7);
+      border: 1px solid var(--border-distr); border-radius: 100%;
+      background-color: var(--canvas);
+      color: var(--text-muted);
       cursor: grab;
       overflow: hidden;
     }
@@ -340,12 +349,12 @@
     .radio-visual {
       display: block; width: 24px; height: 24px;
       border-radius: 50%;
-      background: rgba(24,29,37,0.6);
-      border: 1px solid rgba(219,223,230,0.6);
+      background: var(--surface-input);
+      border: 1px solid var(--border-input);
       position: relative; flex-shrink: 0; pointer-events: none;
     }
     .radio-control input[type="radio"]:checked ~ .radio-visual {
-      background: #404A59;
+      background: var(--surface-selected);
     }
     .radio-control input[type="radio"]:checked ~ .radio-visual::after {
       content: '';
@@ -353,7 +362,7 @@
       transform: translate(-50%, -50%);
       width: 12px; height: 12px;
       border-radius: 50%;
-      background: rgba(252,252,253,0.7);
+      background: var(--text-muted);
     }
     .radio-label {
       font-family: var(--font-copy);
@@ -379,8 +388,8 @@
       appearance: none; -webkit-appearance: none; cursor: pointer;
     }
     .select-field:focus { outline: none; }
-    .select-field option { background: #1e2433; color: var(--text-primary); }
-    .select-field optgroup { background: #1e2433; color: var(--text-muted); font-style: normal; font-size: 13px; }
+    .select-field option { background: var(--surface-option); color: var(--text-primary); }
+    .select-field optgroup { background: var(--surface-option); color: var(--text-muted); font-style: normal; font-size: 13px; }
     .select-chevron {
       position: absolute; right: 12px; top: 50%;
       transform: translateY(-50%);
@@ -421,13 +430,13 @@
       appearance: none; -webkit-appearance: none;
       width: 24px; height: 12px;
       border-radius: 999px;
-      background: #fcfcfd; border: 1px solid #2c343f;
+      background: var(--text-primary); border: 1px solid var(--surface-hover);
       cursor: ew-resize;
     }
     input[type="range"].temp-slider::-moz-range-thumb {
       width: 24px; height: 12px;
       border-radius: 999px;
-      background: #fcfcfd; border: 1px solid #2c343f;
+      background: var(--text-primary); border: 1px solid var(--surface-hover);
       cursor: ew-resize;
     }
     .slider-range-row {
@@ -510,17 +519,17 @@
     .btn-primary {
       display: flex; align-items: center; justify-content: center;
       width: 100%; height: 48px;
-      background: #657081;
+      background: var(--surface-action);
       border: none;
       border-radius: 999px;
-      color: #fcfcfd;
+      color: var(--text-primary);
       font-family: var(--font-copy);
       font-variation-settings: 'wdth' 105, 'wght' 400;
       font-size: 14px; line-height: 20px;
       cursor: pointer; transition: background 0.15s; padding: 0 24px;
       text-decoration: none;
     }
-    .btn-primary:hover { background: #758292; }
+    .btn-primary:hover { background: var(--surface-action-hover); }
     .btn-primary:focus-visible { box-shadow: 0 0 0 2px inset; }
 
     /* ── TEXT LINKS ─────────────────────────────────────────────────────── */
@@ -535,11 +544,11 @@
       font-family: var(--font-copy);
       font-variation-settings: 'wdth' 105, 'wght' 400;
       font-size: 16px; line-height: 24px;
-      color: #fcfcfd;
+      color: var(--text-primary);
       text-decoration: underline;
       text-decoration-thickness: 1px;
       text-underline-offset: 4px;
-      text-decoration-color: #fcfcfd;
+      text-decoration-color: var(--text-primary);
       white-space: nowrap;
       cursor: pointer;
     }
@@ -679,13 +688,13 @@
       gap: 16px;
       min-height: 48px;
       padding: 12px;
-      background: rgba(24, 29, 37, 0.6);
-      border: 1px solid rgba(219, 223, 230, 0.6);
+      background: var(--surface-input);
+      border: 1px solid var(--border-input);
       border-radius: 10px;
       box-sizing: border-box;
     }
     .price-field:focus-within {
-      border-color: rgba(252, 252, 253, 0.8);
+      border-color: var(--border-price-focus);
     }
     .price-input {
       flex: 1;
@@ -715,9 +724,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: rgba(252, 252, 253, 0.5);
+      color: var(--text-clear);
     }
-    .price-clear:hover { color: rgba(252, 252, 253, 0.8); }
+    .price-clear:hover { color: var(--border-price-focus); }
 
     /* ── RESET ROW ──────────────────────────────────────────────────────── */
     .reset-row { display: flex; align-items: center; padding-top: 4px; }
@@ -741,18 +750,39 @@
     .reset-btn:hover { opacity: 0.75; }
 
     /* ── FUEL PRICES ────────────────────────────────────────────────────── */
+    /* below 768px each fuel item stacks (label on top, input + unit below) like the baseline page,
+       so the two items fit a 320px screen; from 768px label, input and unit sit in one row */
     .fuel-prices-row {
-      display: flex;
-      gap: var(--sys-space-relative-2xl);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: var(--sys-space-fixed-200);
     }
     .fuel-price-item {
-      flex: 1;
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: var(--sys-space-fixed-100);
+      row-gap: var(--sys-space-fixed-100);
       align-items: center;
-      gap: 8px;
+    }
+    .fuel-price-item .fuel-price-label { grid-column: 1 / -1; }
+    @media (min-width: 768px) {
+      .fuel-prices-row {
+        display: flex;
+        gap: var(--sys-space-relative-2xl);
+      }
+      .fuel-price-item {
+        flex: 1;
+        display: flex;
+        gap: var(--sys-space-fixed-100);
+      }
+      .fuel-price-item .price-input {
+        flex: 0 0 80px;
+        width: auto;
+      }
     }
     .fuel-price-item .price-input {
-      flex: 0 0 80px;
+      width: 100%;
+      box-sizing: border-box;
       height: 40px;
       background: var(--surface-input);
       border: 1px solid var(--border-input);
@@ -861,7 +891,7 @@
     <div class="nav-icon topbar-search-left">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
       <rect width="24" height="24" fill="white" fill-opacity="0.01"/>
-      <path d="M22 22L13.7174 13.7174M15.5435 9.02174C15.5435 12.987 12.5696 15.5435 9.02174 15.5435C5.42174 15.5435 2.5 12.6217 2.5 9.02174C2.5 5.42174 5.42174 2.5 9.02174 2.5C12.6217 2.5 15.5435 5.42174 15.5435 9.02174Z" stroke="#DBDFE6"/>
+      <path d="M22 22L13.7174 13.7174M15.5435 9.02174C15.5435 12.987 12.5696 15.5435 9.02174 15.5435C5.42174 15.5435 2.5 12.6217 2.5 9.02174C2.5 5.42174 5.42174 2.5 9.02174 2.5C12.6217 2.5 15.5435 5.42174 15.5435 9.02174Z" stroke="currentColor"/>
       </svg>
     </div>
   </div>
@@ -885,18 +915,18 @@
     <div class="nav-icon topbar-search-right">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
       <rect width="24" height="24" fill="white" fill-opacity="0.01"/>
-      <path d="M22 22L13.7174 13.7174M15.5435 9.02174C15.5435 12.987 12.5696 15.5435 9.02174 15.5435C5.42174 15.5435 2.5 12.6217 2.5 9.02174C2.5 5.42174 5.42174 2.5 9.02174 2.5C12.6217 2.5 15.5435 5.42174 15.5435 9.02174Z" stroke="#DBDFE6"/>
+      <path d="M22 22L13.7174 13.7174M15.5435 9.02174C15.5435 12.987 12.5696 15.5435 9.02174 15.5435C5.42174 15.5435 2.5 12.6217 2.5 9.02174C2.5 5.42174 5.42174 2.5 9.02174 2.5C12.6217 2.5 15.5435 5.42174 15.5435 9.02174Z" stroke="currentColor"/>
       </svg>
     </div>
     <div class="nav-icon">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
       <rect width="24" height="24" fill="white" fill-opacity="0.01"/>
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M2.11091 4.61091C4.2588 2.46303 7.7412 2.46303 9.88909 4.61091L12 6.72183L14.1109 4.61091C16.2588 2.46303 19.7412 2.46303 21.8891 4.61091C24.037 6.7588 24.037 10.2412 21.8891 12.3891L12 22.2782L2.11091 12.3891C-0.036971 10.2412 -0.036971 6.7588 2.11091 4.61091Z" stroke="#DBDFE6" stroke-linecap="round"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M2.11091 4.61091C4.2588 2.46303 7.7412 2.46303 9.88909 4.61091L12 6.72183L14.1109 4.61091C16.2588 2.46303 19.7412 2.46303 21.8891 4.61091C24.037 6.7588 24.037 10.2412 21.8891 12.3891L12 22.2782L2.11091 12.3891C-0.036971 10.2412 -0.036971 6.7588 2.11091 4.61091Z" stroke="currentColor" stroke-linecap="round"/>
       </svg>
     </div>
     <div class="nav-icon">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M17.5 13.5C18.1 13.5 18.5 13.9 18.5 14.5V21.5H5.5V14.5C5.5 13.9 5.9 13.5 6.5 13.5H17.5ZM13.5 3.5C14.6 3.5 15.5 4.4 15.5 5.5V8.5C15.5 9.6 14.6 10.5 13.5 10.5H10.5C9.4 10.5 8.5 9.6 8.5 8.5V5.5C8.5 4.4 9.4 3.5 10.5 3.5H13.5Z" stroke="#DBDFE6"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M17.5 13.5C18.1 13.5 18.5 13.9 18.5 14.5V21.5H5.5V14.5C5.5 13.9 5.9 13.5 6.5 13.5H17.5ZM13.5 3.5C14.6 3.5 15.5 4.4 15.5 5.5V8.5C15.5 9.6 14.6 10.5 13.5 10.5H10.5C9.4 10.5 8.5 9.6 8.5 8.5V5.5C8.5 4.4 9.4 3.5 10.5 3.5H13.5Z" stroke="currentColor"/>
       </svg>
     </div>
   </div>
@@ -909,8 +939,8 @@
   <div class="header">
     <div class="header-icon">
       <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
-        <path d="M29.6172 33.83V32.615H31.1172C31.8972 30.32 34.0272 29 36.6672 29C37.8522 29 39.0972 29.165 40.0422 29.57V30.875C38.9622 30.44 37.8672 30.29 36.8772 30.29C34.7472 30.29 33.2322 31.1 32.6172 32.615H38.1072V33.83H32.3472C32.3022 34.085 32.3022 34.34 32.3022 34.61C32.3022 34.895 32.3172 35.18 32.3472 35.435H38.1072V36.65H32.6622C33.3372 38.3 35.0472 38.945 36.8322 38.945C38.5722 38.945 39.5172 38.675 40.1322 38.45V39.71C39.3822 40.01 38.3922 40.22 36.8022 40.22C34.0422 40.22 31.8672 39.02 31.1022 36.65H29.6172V35.435H30.8472C30.8172 35.18 30.8022 34.895 30.8022 34.61C30.8022 34.34 30.8172 34.085 30.8472 33.83H29.6172Z" fill="#FCFCFD"/>
-        <path d="M18.5 8.5H13.5V40.5C13.5 41.5609 13.9214 42.5783 14.6716 43.3284C15.4217 44.0786 16.4391 44.5 17.5 44.5H29.5C30.5609 44.5 31.5783 44.0786 32.3284 43.3284C32.7115 42.9454 33.0088 42.4926 33.2081 42M18.5 8.5V4.5H28.5V8.5M18.5 8.5H28.5M28.5 8.5H33.5V28M28.5 18.5H23.5M23.5 18.5H18.5M23.5 18.5V23.5M23.5 18.5V13.5M19.5 36.5H27.5" stroke="#FCFCFD" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M29.6172 33.83V32.615H31.1172C31.8972 30.32 34.0272 29 36.6672 29C37.8522 29 39.0972 29.165 40.0422 29.57V30.875C38.9622 30.44 37.8672 30.29 36.8772 30.29C34.7472 30.29 33.2322 31.1 32.6172 32.615H38.1072V33.83H32.3472C32.3022 34.085 32.3022 34.34 32.3022 34.61C32.3022 34.895 32.3172 35.18 32.3472 35.435H38.1072V36.65H32.6622C33.3372 38.3 35.0472 38.945 36.8322 38.945C38.5722 38.945 39.5172 38.675 40.1322 38.45V39.71C39.3822 40.01 38.3922 40.22 36.8022 40.22C34.0422 40.22 31.8672 39.02 31.1022 36.65H29.6172V35.435H30.8472C30.8172 35.18 30.8022 34.895 30.8022 34.61C30.8022 34.34 30.8172 34.085 30.8472 33.83H29.6172Z" fill="currentColor"/>
+        <path d="M18.5 8.5H13.5V40.5C13.5 41.5609 13.9214 42.5783 14.6716 43.3284C15.4217 44.0786 16.4391 44.5 17.5 44.5H29.5C30.5609 44.5 31.5783 44.0786 32.3284 43.3284C32.7115 42.9454 33.0088 42.4926 33.2081 42M18.5 8.5V4.5H28.5V8.5M18.5 8.5H28.5M28.5 8.5H33.5V28M28.5 18.5H23.5M23.5 18.5H18.5M23.5 18.5V23.5M23.5 18.5V13.5M19.5 36.5H27.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     <h1>Calculate your consumption cost</h1>
@@ -1136,8 +1166,8 @@
         <div class="reset-row">
           <button class="reset-btn" id="btn-reset">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 8C2 4.7 4.7 2 8 2C10.3 2 12.3 3.3 13.3 5M14 8C14 11.3 11.3 14 8 14C5.7 14 3.7 12.7 2.7 11" stroke="#FCFCFD" stroke-linecap="round"/>
-              <path d="M13 2L13.5 5.5L10 5" stroke="#FCFCFD" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 8C2 4.7 4.7 2 8 2C10.3 2 12.3 3.3 13.3 5M14 8C14 11.3 11.3 14 8 14C5.7 14 3.7 12.7 2.7 11" stroke="currentColor" stroke-linecap="round"/>
+              <path d="M13 2L13.5 5.5L10 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             Reset values to default values
           </button>
